@@ -12,12 +12,15 @@
         canvas {
             background: #87CEEB; /* 空の色 */
             display: block;
-            margin: 0 auto;
+            width: 100vw;  /* ビューポートの幅 */
+            height: 100vh; /* ビューポートの高さ */
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
-    <script src="game.js"></script>
+    <main style="width: 1000px; height: 100vh;">
+        <canvas id="gameCanvas" width="100%" height="100%"></canvas>
+        <script src="game.js" type="module"></script>
+    </main>
 </body>
 </html>
