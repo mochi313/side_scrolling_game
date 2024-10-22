@@ -119,7 +119,6 @@ function clear() {
 
 function gameLoop(timestamp) {
     clear();
-    drawBackground();
     drawGround();
     drawPlayer();
     drawEnemies(ctx,camera);
