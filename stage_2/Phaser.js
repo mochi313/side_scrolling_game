@@ -6,9 +6,9 @@ class Game extends Phaser.Scene {
     preload() {
         // 画像の読み込み
         this.load.image('ground', 'images/test.jpeg');
-        this.load.image('back', 'images/back.png');
-        this.load.spritesheet('man', 'images/man.png',
-            { frameWidth: 64, frameHeight: 64 }
+        this.load.image('back', 'images/background.avif');
+        this.load.spritesheet('man', 'images/spritesheet1.png',
+            { frameWidth: 131, frameHeight: 128 }
         );
         this.load.image("block", "images/block.png")
         this.load.image("platform", "images/platform.png")
@@ -19,7 +19,7 @@ class Game extends Phaser.Scene {
         const stage = {
             x: 0,
             y: 0,
-            width: 800 * 3, //ステージの大きさ
+            width: 600 * 3, //ステージの大きさ
             height: this.scale.height
         }
 
@@ -34,12 +34,12 @@ class Game extends Phaser.Scene {
             this.platforms.create(64 * i + 32, stage.height - 32, "block");
         }
         // 空中に浮いている足場の追加
-        this.platforms.create(150, 450, "platform");
+        this.platforms.create(150, 600, "platform");
         this.platforms.create(250, 350, "platform");
         this.platforms.create(650, 420, "platform");
 
         // playerの作成
-        this.player = this.physics.add.sprite(100, 450, 'man');
+        this.player = this.physics.add.sprite(100, 550, 'man');
         this.player.setCollideWorldBounds(true);
         this.physics.add.collider(this.player, this.platforms);
 
@@ -88,7 +88,8 @@ class Game extends Phaser.Scene {
             }
         } else if (this.cursors.right.isDown) {
             // 右が押されたら
-            this.player.setVelocityX(330);
+            this.player.
+                this.player.setVelocityX(330);
             if (this.player.body.touching.down) {
                 // 地面についていたら
                 this.player.anims.play("walk", true)
