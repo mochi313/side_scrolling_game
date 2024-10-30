@@ -12,6 +12,7 @@ class Game extends Phaser.Scene {
         );
         this.load.image("block", "images/block.png")
         this.load.image("platform", "images/platform.png")
+        this.load.image("goal", "images/goal_image2.png")
     }
 
     create(){
@@ -19,16 +20,18 @@ class Game extends Phaser.Scene {
             x: 0,
             y: 0,
             width: 800 * 3, //ステージの大きさ
-            height: 600
+            height: this.scale.height
         }
 
         // 背景の追加
-        this.add.image(400,300,'back').setScrollFactor(0);
+        const background = this.add.image(this.scale.width / 2, this.scale.height / 2,'back').setScrollFactor(0);
+        // 画像のリサイズ
+        background.setDisplaySize(this.scale.width, this.scale.height);
 
         // 地形の追加
         this.platforms = this.physics.add.staticGroup();
         for(let i = 0; i < Math.floor(stage.width / 64 + 1); i ++){
-            this.platforms.create(64 * i + 32, 570, "block");
+            this.platforms.create(64 * i + 32, stage.height - 32, "block");
         }
         // 空中に浮いている足場の追加
         this.platforms.create(150, 450, "platform");
@@ -37,15 +40,20 @@ class Game extends Phaser.Scene {
 
         // playerの作成
         this.player = this.physics.add.sprite(100, 450, 'man');
-
         this.player.setCollideWorldBounds(true);
-
         this.physics.add.collider(this.player, this.platforms);
 
-        //cursorsにユーザーのキーボードの操作を検知させる
-        this.cursors = this.input.keyboard.createCursorKeys(); 
+        // ゴールの画像を追加
+        this.goalImage = this.add.image(stage.width - 128, stage.height - 320, 'goal');
+        // ゴールの判定を追加
+        this.goalCollider = this.physics.add.staticGroup();
+        const goalBody = this.goalCollider.create(stage.width - 128, stage.height - 320, 'goal').setAlpha(0);
+        goalBody.setSize(2, 512);
 
-        this.anims.create({ //playerが歩いている時のアニメーション
+        //cursorsにユーザーのキーボードの操作を検知させる
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+        this.anims.create({ //playerが歩いている時のアニメーショaン
             key: 'walk',
             frames: this.anims.generateFrameNumbers('man', { start: 1, end: 3 }),
             frameRate: 10,
@@ -57,20 +65,13 @@ class Game extends Phaser.Scene {
             frameRate: 20
         });
 
-        this.cameras.main.startFollow(this.player); //playerを追尾するカメラを作成
-        this.cameras.main.setBounds( //カメラの挙動の制御
-            stage.x,
-            stage.y,
-            stage.width,
-            stage.height
-        );
+        //playerを追尾するカメラを作成
+        this.cameras.main.startFollow(this.player);
+        this.cameras.main.setBounds(stage.x,stage.y,stage.width,stage.height);
+        this.physics.world.setBounds(stage.x,stage.y,stage.width,stage.height);
 
-        this.physics.world.setBounds(
-            stage.x,
-            stage.y,
-            stage.width,
-            stage.height
-        );
+        // ゴールの判定
+        this.physics.add.overlap(this.player, this.goalCollider, this.reachGoal, null, this);
     }
 
     update(){
@@ -98,12 +99,22 @@ class Game extends Phaser.Scene {
             this.player.anims.play("turn", true)
         }
     }
+
+    reachGoal(player, goal) {
+        console.log("ゴールに到達しました！");
+        // ここにゴールに到達したときの処理を追加
+        // 例えば、ゲームを終了する、次のレベルに進むなど
+        this.scene.pause(); // ゲームを一時停止
+        alert("ゴールに到達しました！");
+    }
 }
+
+console.log(Phaser.VERSION);
 
 var config = {
     type: Phaser.AUTO,
-    width: 800,
-    height: 600,
+    width: Math.min(window.innerWidth, 1920),
+    height: Math.min(window.innerHeight, 1080),
     physics: {
         default: 'arcade',
         arcade: {
@@ -111,8 +122,21 @@ var config = {
             debug: false
         }
     },
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+    },
+    render: {
+        pixelArt: false,
+        antialias: true,
+        antialiasGL: true,
+    },
     scene: Game
 };
 
 //ゲームオブジェクトの生成
 var game = new Phaser.Game(config);
+
+window.addEventListener('resize', () => {
+    game.scale.resize(window.innerWidth, window.innerHeight);
+});
