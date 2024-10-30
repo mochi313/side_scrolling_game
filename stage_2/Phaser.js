@@ -6,12 +6,13 @@ class Game extends Phaser.Scene {
     preload() {
         // 画像の読み込み
         this.load.image('ground', 'images/test.jpeg');
-        this.load.image('back', 'images/background.avif');
-        this.load.spritesheet('man', 'images/spritesheet1.png',
+        this.load.image('back', 'images/back.png',);
+        this.load.spritesheet('man', 'images/spritesheet.png',
             { frameWidth: 131, frameHeight: 128 }
         );
         this.load.image("block", "images/block.png")
         this.load.image("platform", "images/platform.png")
+        this.load.image("pblock", "images/maptile_renga_brown_02_matt.png",);
         this.load.image("goal", "images/goal_image2.png")
     }
 
@@ -19,7 +20,7 @@ class Game extends Phaser.Scene {
         const stage = {
             x: 0,
             y: 0,
-            width: 600 * 3, //ステージの大きさ
+            width: 1000 * 3, //ステージの大きさ
             height: this.scale.height
         }
 
@@ -34,14 +35,36 @@ class Game extends Phaser.Scene {
             this.platforms.create(64 * i + 32, stage.height - 32, "block");
         }
         // 空中に浮いている足場の追加
-        this.platforms.create(150, 600, "platform");
+        this.platforms.create(150, 450, "platform");
         this.platforms.create(250, 350, "platform");
         this.platforms.create(650, 420, "platform");
 
+        // pblockの当たり判定を修正
+        const pblock1 = this.platforms.create(650 + 64, 660, "pblock");
+        const pblock2 = this.platforms.create(650 + 64 * 2, 660, "pblock");
+        const pblock3 = this.platforms.create(650 + 64 * 3, 660, "pblock");
+        const pblock4 = this.platforms.create(650 + 64 * 4, 660, "pblock");
+
+        // 当たり判定の更新
+        [pblock1, pblock2, pblock3, pblock4].forEach(pblock => {
+            pblock.refreshBody();
+            pblock.setSize(64, 40); // 必要に応じてサイズを調整
+            pblock.setOffset(0, 0); // 必要に応じてオフセットを調整
+        });
+
         // playerの作成
-        this.player = this.physics.add.sprite(100, 550, 'man');
+        this.player = this.physics.add.sprite(100, 450, 'man');
         this.player.setCollideWorldBounds(true);
+
+        // プレイヤーの当たり判定のサイズと位置を画像に合わせる
+        this.player.setSize(90, 120); // 必要に応じてサイズを調整
+        this.player.setOffset(20, 4); // 必要に応じてオフセットを調整
+
+
+
         this.physics.add.collider(this.player, this.platforms);
+
+
 
         // ゴールの画像を追加
         this.goalImage = this.add.image(stage.width - 128, stage.height - 320, 'goal');
@@ -77,12 +100,12 @@ class Game extends Phaser.Scene {
     update() {
         if (this.cursors.up.isDown && this.player.body.touching.down) {
             // 上が押されたら && 地面についていたら
-            this.player.setVelocityY(-800);
+            this.player.setVelocityY(-1200);
             this.player.anims.play("turn", true)
         } else if (this.cursors.left.isDown) {
             // 左が押されたら
-            this.player.scaleX *= -1;
             this.player.setVelocityX(-330);
+            this.player.flipX = true; // キャラクターを左向きに反転
             if (this.player.body.touching.down) {
                 // 地面についていたら
                 this.player.anims.play("walk", true)
@@ -90,13 +113,14 @@ class Game extends Phaser.Scene {
         } else if (this.cursors.right.isDown) {
             // 右が押されたら
             this.player.setVelocityX(330);
+            this.player.flipX = false; // キャラクターを右向きに戻す
             if (this.player.body.touching.down) {
                 // 地面についていたら
                 this.player.anims.play("walk", true)
             }
         } else {
             // 何も押されていない時
-            this.player.setVelocityX();
+            this.player.setVelocityX(0);
             this.player.anims.play("turn", true)
         }
     }
@@ -120,7 +144,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 3000 }, //重力の強さ
-            debug: false
+            debug: true
         }
     },
     scale: {
