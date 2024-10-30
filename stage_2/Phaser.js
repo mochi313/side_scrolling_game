@@ -48,12 +48,12 @@ class Game extends Phaser.Scene {
         // 当たり判定の更新
         [pblock1, pblock2, pblock3, pblock4].forEach(pblock => {
             pblock.refreshBody();
-            pblock.setSize(64, 40); // 必要に応じてサイズを調整
+            pblock.setSize(64, 35); // 必要に応じてサイズを調整
             pblock.setOffset(0, 0); // 必要に応じてオフセットを調整
         });
 
         // playerの作成
-        this.player = this.physics.add.sprite(100, 450, 'man');
+        this.player = this.physics.add.sprite(100, 1080 - 64, 'man');
         this.player.setCollideWorldBounds(true);
 
         // プレイヤーの当たり判定のサイズと位置を画像に合わせる
@@ -62,7 +62,7 @@ class Game extends Phaser.Scene {
 
 
 
-        this.physics.add.collider(this.player, this.platforms);
+        this.physics.add.collider(this.player, this.platforms, this.handleCollision, null, this);
 
 
 
@@ -72,6 +72,11 @@ class Game extends Phaser.Scene {
         this.goalCollider = this.physics.add.staticGroup();
         const goalBody = this.goalCollider.create(stage.width - 128, stage.height - 320, 'goal').setAlpha(0);
         goalBody.setSize(2, 512);
+
+        this.add.text(20, 20, 'ゲームスタート！', {
+            font: '32px Arial',
+            fill: '#ffffff' // テキストの色
+        });
 
         //cursorsにユーザーのキーボードの操作を検知させる
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -94,13 +99,13 @@ class Game extends Phaser.Scene {
         this.physics.world.setBounds(stage.x, stage.y, stage.width, stage.height);
 
         // ゴールの判定
-        this.physics.add.overlap(this.player, this.goalCollider, this.reachGoal, null, this);
+        this.physics.add.overlap(this.player, this.goalCollider, this.reachGoal);
     }
 
     update() {
         if (this.cursors.up.isDown && this.player.body.touching.down) {
             // 上が押されたら && 地面についていたら
-            this.player.setVelocityY(-1200);
+            this.player.setVelocityY(-1300);
             this.player.anims.play("turn", true)
         } else if (this.cursors.left.isDown) {
             // 左が押されたら
@@ -126,15 +131,16 @@ class Game extends Phaser.Scene {
     }
 
     reachGoal(player, goal) {
-        console.log("ゴールに到達しました！");
-        // ここにゴールに到達したときの処理を追加
-        // 例えば、ゲームを終了する、次のレベルに進むなど
-        this.scene.pause(); // ゲームを一時停止
-        alert("ゴールに到達しました！");
+
+        // ゲームを一時停止
+        this.scene.pause();
+
+        // 一時停止後の再開を追加（例：1秒後にゲームを再開する）
+        this.time.delayedCall(2000, () => {
+            this.scene.resume(); // ゲームを再開
+        });
     }
 }
-
-console.log(Phaser.VERSION);
 
 var config = {
     type: Phaser.AUTO,
