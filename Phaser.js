@@ -4,7 +4,7 @@ class Game extends Phaser.Scene {
     cursors;
 
     preload(){
-        //背景の画像
+        // 画像の読み込み
         this.load.image('ground', 'images/test.jpeg');
         this.load.image('back', 'images/back.png');
         this.load.spritesheet('man', 'images/man.png',
@@ -15,38 +15,62 @@ class Game extends Phaser.Scene {
     }
 
     create(){
-        // this.cameras.main.startFollow(this.player);
-        this.add.image(400,300,'back');
-        // this.cameras.main.startFollow(player);
+        const stage = {
+            x: 0,
+            y: 0,
+            width: 800 * 3, //ステージの大きさ
+            height: 600
+        }
+
+        // 背景の追加
+        this.add.image(400,300,'back').setScrollFactor(0);
+
+        // 地形の追加
         this.platforms = this.physics.add.staticGroup();
-        for(let i = 0; i < Math.floor(800 / 64 + 1); i ++){
+        for(let i = 0; i < Math.floor(stage.width / 64 + 1); i ++){
             this.platforms.create(64 * i + 32, 570, "block");
         }
+        // 空中に浮いている足場の追加
         this.platforms.create(150, 450, "platform");
         this.platforms.create(250, 350, "platform");
         this.platforms.create(650, 420, "platform");
 
-        // this.platforms.create(400, 700, 'ground').setScale(2).refreshBody();
-
+        // playerの作成
         this.player = this.physics.add.sprite(100, 450, 'man');
 
         this.player.setCollideWorldBounds(true);
 
         this.physics.add.collider(this.player, this.platforms);
 
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.anims.create({
+        //cursorsにユーザーのキーボードの操作を検知させる
+        this.cursors = this.input.keyboard.createCursorKeys(); 
+
+        this.anims.create({ //playerが歩いている時のアニメーション
             key: 'walk',
             frames: this.anims.generateFrameNumbers('man', { start: 1, end: 3 }),
             frameRate: 10,
             repeat: -1
         });
-        this.anims.create({
+        this.anims.create({ //playerが止まっている時のアニメーション
             key: "turn",
             frames: [{ key: "man", frame: 0 }],
             frameRate: 20
         });
-        // player.anims.play('walk',true);
+
+        this.cameras.main.startFollow(this.player); //playerを追尾するカメラを作成
+        this.cameras.main.setBounds( //カメラの挙動の制御
+            stage.x,
+            stage.y,
+            stage.width,
+            stage.height
+        );
+
+        this.physics.world.setBounds(
+            stage.x,
+            stage.y,
+            stage.width,
+            stage.height
+        );
     }
 
     update(){
@@ -83,7 +107,7 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 3000 },
+            gravity: { y: 3000 }, //重力の強さ
             debug: false
         }
     },
