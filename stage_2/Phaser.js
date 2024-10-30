@@ -81,6 +81,7 @@ class Game extends Phaser.Scene {
             this.player.anims.play("turn", true)
         } else if (this.cursors.left.isDown) {
             // 左が押されたら
+            this.player.scaleX *= -1;
             this.player.setVelocityX(-330);
             if (this.player.body.touching.down) {
                 // 地面についていたら
@@ -88,15 +89,14 @@ class Game extends Phaser.Scene {
             }
         } else if (this.cursors.right.isDown) {
             // 右が押されたら
-            this.player.
-                this.player.setVelocityX(330);
+            this.player.setVelocityX(330);
             if (this.player.body.touching.down) {
                 // 地面についていたら
                 this.player.anims.play("walk", true)
             }
         } else {
             // 何も押されていない時
-            this.player.setVelocityX(0);
+            this.player.setVelocityX();
             this.player.anims.play("turn", true)
         }
     }
