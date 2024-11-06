@@ -9,14 +9,24 @@ let lastSpawnTime = 0; // ここで変数を定義
 const mapWidth = 2000; // マップの幅を設定
 
 // Canvasのサイズをウィンドウのサイズに合わせる
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+const dpr = window.devicePixelRatio || 1;
+width = window.innerWidth;
+height = window.innerHeight;
+
+canvas.width = width * dpr;
+canvas.height = height * dpr;
+
+ctx.scale(dpr,dpr);
+
+canvas.style.width = width + 'px';
+canvas.style.height = height + 'px';
+
 
 let player = {
     x: 50,
     y: canvas.height - 100,
-    width: 50,
-    height: 50,
+    width: 30,
+    height: 82.5,
     speed: 5,
     dx: 0,
     dy: 0,
@@ -24,6 +34,9 @@ let player = {
     jumpPower: -15,
     onGround: true,
 };
+
+const playerImage = new Image();
+playerImage.src = './images/アセット 1.png'; 
 
 let camera = {
     x: 0,
@@ -65,8 +78,9 @@ function drawBackground() {
 
 
 function drawPlayer() {
-    ctx.fillStyle = 'red';
-    ctx.fillRect(player.x - camera.x, player.y, player.width, player.height);
+    // ctx.fillStyle = 'red';
+    // ctx.fillRect(player.x - camera.x, player.y, player.width, player.height);
+    ctx.drawImage(playerImage,player.x - camera.x, player.y, player.width, player.height);
 }
 
 function drawGround() {
@@ -155,10 +169,17 @@ window.addEventListener('keydown', keyDown);
 window.addEventListener('keyup', keyUp);
 
 // ウィンドウサイズ変更時の処理
-window.addEventListener('resize', () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
+// window.addEventListener('resize', () => {
+//     width = window.innerWidth;
+//     height = window.innerHeight;
+
+//     canvas.width = width * dpr;
+//     canvas.height = height * dpr;
+
+//     ctx.scale(dpr,dpr);
+//     canvas.style.width = width + 'px';
+//     canvas.style.height = height + 'px';
+// });
 
 // gameLoop();
 backgroundImage.onload = () => {
