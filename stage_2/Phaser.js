@@ -1,13 +1,13 @@
+let cursors;
+let gameOver = false;
 class Game extends Phaser.Scene {
     player;
     platforms;
-    cursors;
     score = 0;
     scoreText;
     stars;
     bombs;
     goalCollider;
-    gameOver = false; // ゲームオーバー状態を管理するフラグ
     gameOverText;
 
     preload() {
@@ -69,7 +69,7 @@ class Game extends Phaser.Scene {
         this.goalCollider.body.setAllowGravity(false);
 
 
-        this.cursors = this.input.keyboard.createCursorKeys();
+        cursors = this.input.keyboard.createCursorKeys();
 
         this.anims.create({
             key: 'walk',
@@ -140,20 +140,20 @@ class Game extends Phaser.Scene {
 
 
     update() {
-        if (this.gameOver) { // ゲームオーバー状態ならupdateをスキップ
+        if (gameOver) { // ゲームオーバーならupdate処理をスキップ
             return;
         }
 
-        if (this.cursors.up.isDown && this.player.body.touching.down) {
+        if (cursors.up.isDown && this.player.body.touching.down) {
             this.player.setVelocityY(-1300);
             this.player.anims.play("turn", true)
-        } else if (this.cursors.left.isDown) {
+        } else if (cursors.left.isDown) {
             this.player.setVelocityX(-330);
             this.player.flipX = true;
             if (this.player.body.touching.down) {
                 this.player.anims.play("walk", true)
             }
-        } else if (this.cursors.right.isDown) {
+        } else if (cursors.right.isDown) {
             this.player.setVelocityX(330);
             this.player.flipX = false;
             if (this.player.body.touching.down) {
@@ -166,27 +166,32 @@ class Game extends Phaser.Scene {
     }
 
     reachGoal(player, goal) {
-        if (this.scene.isPaused() || this.gameOver) return;
-
-        this.gameOver = true;
+        if (this.scene.isPaused() || gameOver) return;
+        gameOver = true;
         this.physics.pause();
-        this.showGameOverText("Goal!"); // ゴール到達時のテキストを表示
+        player.anims.play('turn');
+        this.showGameOverText("Goal!");
 
         this.time.delayedCall(2000, () => {
+            // シーン再起動前に物理演算を再開し、gameOverをfalseにする
+            this.physics.resume();
+            gameOver = false;
             this.scene.restart();
         });
     }
 
     hitBomb(player, bomb) {
-        if (this.gameOver) return;
-
-        this.gameOver = true;
-        this.physics.pause();
+        if (gameOver) return;
+        gameOver = true;
+        this.physics.pause(); // 物理演算を一時停止
         player.setTint(0xff0000);
         player.anims.play('turn');
-        this.showGameOverText("Game Over!"); // ゲームオーバー時のテキストを表示
+        this.showGameOverText("Game Over!");
 
         this.time.delayedCall(2000, () => {
+            // シーン再起動前に物理演算を再開し、gameOverをfalseにする
+            this.physics.resume();
+            gameOver = false;
             this.scene.restart();
         });
     }
