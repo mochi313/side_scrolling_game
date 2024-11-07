@@ -2,6 +2,8 @@ class Game extends Phaser.Scene {
     player;
     platforms;
     cursors;
+    score = 0; // スコアの初期値
+    scoreText; // スコア表示用テキスト
 
     preload() {
         // 画像の読み込み
@@ -14,6 +16,7 @@ class Game extends Phaser.Scene {
         this.load.image("platform", "images/platform.png")
         this.load.image("pblock", "images/maptile_renga_brown_02_matt.png",);
         this.load.image("goal", "images/goal_image2.png")
+        this.load.image('star', 'images/star.png');
     }
 
     create() {
@@ -60,11 +63,7 @@ class Game extends Phaser.Scene {
         this.player.setSize(90, 120); // 必要に応じてサイズを調整
         this.player.setOffset(20, 4); // 必要に応じてオフセットを調整
 
-
-
         this.physics.add.collider(this.player, this.platforms, this.handleCollision, null, this);
-
-
 
         // ゴールの画像を追加
         this.goalImage = this.add.image(stage.width - 128, stage.height - 320, 'goal');
@@ -72,11 +71,6 @@ class Game extends Phaser.Scene {
         this.goalCollider = this.physics.add.staticGroup();
         const goalBody = this.goalCollider.create(stage.width - 128, stage.height - 320, 'goal').setAlpha(0);
         goalBody.setSize(2, 512);
-
-        this.add.text(20, 20, 'ゲームスタート！', {
-            font: '32px Arial',
-            fill: '#ffffff' // テキストの色
-        });
 
         //cursorsにユーザーのキーボードの操作を検知させる
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -98,9 +92,51 @@ class Game extends Phaser.Scene {
         this.cameras.main.setBounds(stage.x, stage.y, stage.width, stage.height);
         this.physics.world.setBounds(stage.x, stage.y, stage.width, stage.height);
 
+
+        // スターの生成（ランダムな位置に配置）
+        const stars = this.physics.add.group({
+            key: 'star',
+            repeat: 11
+        });
+
+        stars.children.iterate((child) => {
+            // X軸とY軸のランダムな位置に配置
+            const x = Phaser.Math.Between(0, stage.width); // ステージ幅内のランダムなX位置
+            const y = Phaser.Math.Between(0, stage.height - 100); // ステージ高さ内（地面より少し上）のランダムなY位置
+            child.setPosition(x, y);
+
+            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8)); // バウンド効果を追加
+            child.setCollideWorldBounds(true); // 画面の端で止まるように設定
+        });
+
+
+        // スターと床の衝突判定を追加
+        this.physics.add.collider(stars, this.platforms);
+
+        // スコアの表示
+        this.scoreText = this.add.text(16, 16, 'Score: 0', {
+            fontSize: '32px',
+            fill: '#000'
+        }).setScrollFactor(0); // カメラに追従させない設定
+
+        // スターとプレイヤーの重なり判定
+        this.physics.add.overlap(this.player, stars, this.collectStar, null, this);
+
+        const bombs = this.physics.add.group();
+        this.physics.add.collider(bombs, this.platforms);
+        this.physics.add.collider(this.player, bombs, this.hitBomb, null, this);
+        this.physics.add.overlap(this.player, this.goalCollider, this.reachGoal, null, this);
+
         // ゴールの判定
         this.physics.add.overlap(this.player, this.goalCollider, this.reachGoal);
     }
+
+    collectStar(player, star) {
+        star.disableBody(true, true);
+        this.score += 10; // スコアの加算
+        this.scoreText.setText('Score: ' + this.score); // スコアの表示を更新
+    }
+
 
     update() {
         if (this.cursors.up.isDown && this.player.body.touching.down) {
@@ -139,6 +175,12 @@ class Game extends Phaser.Scene {
         this.time.delayedCall(2000, () => {
             this.scene.resume(); // ゲームを再開
         });
+    }
+    hitBomb(player, bomb) {
+        this.physics.pause();
+        player.setTint(0xff0000);
+        player.anims.play('turn');
+        gameOver = true;
     }
 }
 
