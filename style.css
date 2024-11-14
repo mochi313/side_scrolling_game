@@ -1,0 +1,31 @@
+@font-face {
+    font-family: '002_zou_ver.2';
+  /*   上記で効かない場合は下記をお試しください。 */
+  /*   font-family: 'LEMON MILK'; */
+    src:
+        url('./font/002zouver.2-Regular.ttf') format('opentype'),
+}
+
+p {
+    font-family: "002_zou_ver.2";
+}
+
+.startButton {
+    font-size: 30px;
+    position: fixed;
+    margin: 0;
+    top: 70%;
+    left: 50%;
+    transform: translateX(-50%)
+    translateY(-50%);
+}
+
+.title {
+    font-size: 130px;
+    position: fixed;
+    margin: 0;
+    top: 40%;
+    left: 50%;
+    transform: translateX(-45%)
+    translateY(-50%);
+}
