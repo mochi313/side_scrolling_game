@@ -23,6 +23,7 @@ class Game extends Phaser.Scene {
     }
 
     create() {
+        gameOver = false; // 明示的に初期化
         const stage = {
             x: 0,
             y: 0,
@@ -185,7 +186,7 @@ class Game extends Phaser.Scene {
             this.player.anims.play("turn", true);
         }
 
-        // プレイヤーが穴に落ちた場合（画面の下端に達した場合）ゲームオーバー処理
+        // プレイヤーが画面外に落ちた場合（画面の下端を超えた場合）ゲームオーバー処理
         if (this.player.y == 868) {
             this.fallOutOfBounds(); // プレイヤーが画面外に落ちた時の処理
         }
@@ -193,15 +194,15 @@ class Game extends Phaser.Scene {
 
     fallOutOfBounds() {
         if (gameOver) return; // ゲームオーバー状態なら処理しない
-
         gameOver = true; // ゲームオーバー状態に設定
-        this.player.setTint(0xff0000); // プレイヤーに赤いエフェクトを適用
-        this.showGameOverText("Game Over");
+        this.physics.pause(); // 物理演算を一時停止
+        this.player.setTint(0xff0000); // プレイヤーを赤くする
+        this.player.anims.play('turn'); // 待機アニメーションを再生
+        this.showGameOverText("Game Over"); // ゲームオーバーテキストを表示
+        this.score = 0;
 
         this.time.delayedCall(2000, () => {
-            // シーン再起動前に物理演算を再開し、gameOverをfalseにする
-            this.physics.resume();
-            gameOver = false;
+            gameOver = false; // 再起動前にリセット
             this.scene.restart();
         });
     }
@@ -227,6 +228,7 @@ class Game extends Phaser.Scene {
         player.setTint(0xff0000);
         player.anims.play('turn');
         this.showGameOverText("Game Over!");
+        this.score = 0;
 
         this.time.delayedCall(2000, () => {
             // シーン再起動前に物理演算を再開し、gameOverをfalseにする
@@ -272,7 +274,7 @@ var config = {
     render: {
         pixelArt: false,
         antialias: true,
-        antialiasGL: true,
+        antialiasGL: false,
     },
     scene: Game
 };
