@@ -31,7 +31,7 @@ class Game extends Phaser.Scene {
         // 地形の追加
         const bS = 64 //blockSize
         this.platforms = this.physics.add.staticGroup();
-        for(let i = 0; i < Math.floor(stage.width / bS + 1); i ++){
+        for(let i = 0; i < Math.floor(stage.width / bS + 2); i ++){
             this.platforms.create(bS * i + (bS/3), stage.height - (bS/2), "block")
         }
 
@@ -137,3 +137,16 @@ var game = new Phaser.Game(config);
 window.addEventListener('resize', () => {
     game.scale.resize(window.innerWidth, window.innerHeight);
 });
+
+const s = document.getElementById("stageSelect")
+const b = document.getElementById("blur")
+window.addEventListener("keydown", (event) => {
+    if(event.key == "Enter"){
+        b.classList.remove("dN")
+        s.classList.remove("dN")
+    }
+    if(event.key == "Escape"){
+        b.classList.add("dN")
+        s.classList.add("dN")
+    }
+})

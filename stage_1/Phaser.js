@@ -6,6 +6,7 @@ class Game extends Phaser.Scene {
     flare;
     playerPlatformCollider;
     timerText;
+    text;
 
     preload(){
         // 画像の読み込み
@@ -34,6 +35,7 @@ class Game extends Phaser.Scene {
             strokeThickness: 4
         });
         this.timerText.setDepth(1)
+        this.timerText.setScrollFactor(0)
 
         this.physics.world.gravity.y = 0;
         const stage = {
@@ -321,8 +323,6 @@ class Game extends Phaser.Scene {
     }
 
     reachGoal(player, goal) {
-        console.log("ゴールに到達しました！");
-        this.scene.pause(); // ゲームを一時停
         this.text = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Game Clear!', {
             fontSize: '64px',
             fontFamily: 'Arial',
@@ -330,7 +330,9 @@ class Game extends Phaser.Scene {
             stroke: '#000000',
             strokeThickness: 6
         }).setOrigin(0.5); // 中央に配置
-        this.text.setDepth(2)
+        this.text.setDepth(3)
+        this.text.setScrollFactor(0)
+        // this.scene.pause(); // ゲームを一時停
     }
 
     playerDeath(){
