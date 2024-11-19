@@ -8,11 +8,14 @@ class Game extends Phaser.Scene {
         // 画像の読み込み
         // this.load.image('ground', 'images/test.jpeg');
         this.load.image('back', '/stage_1/images/back_image3.png');
-        this.load.image("man2", "stage_1/images/カービィ４.png")
+        this.load.spritesheet('mans', '/stage_1/images/カービィず.png',
+            { frameWidth: 64, frameHeight: 64 }
+        );
         this.load.image("block", "stage_1/images/block2.png")
     }
 
     create(){
+        this.physics.world.gravity.y = 0;
         const stage = {
             x: 0,
             y: 0,
@@ -33,9 +36,40 @@ class Game extends Phaser.Scene {
         }
 
         // playerの作成
-        this.player = this.physics.add.sprite(100, 450, 'man2');
+        this.player = this.physics.add.sprite(100, 450, 'mans');
+        this.player.setGravityY(6000)
         this.player.setCollideWorldBounds(true);
-        this.physics.add.collider(this.player, this.platforms);
+        this.playerPlatformCollider = this.physics.add.collider(this.player, this.platforms);
+
+        this.anims.create({ //playerが歩いている時のアニメーショaン
+            key: 'walkLeft',
+            frames: this.anims.generateFrameNumbers('mans', { start: 3, end: 4 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({ //playerが歩いている時のアニメーショaン
+            key: 'jumpLeft',
+            frames: this.anims.generateFrameNumbers('mans', { start: 3, end: 3 }),
+            frameRate: 10,
+            repeat: 1
+        });
+        this.anims.create({ //playerが歩いている時のアニメーショaン
+            key: 'walkRight',
+            frames: this.anims.generateFrameNumbers('mans', { start: 1, end: 2 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({ //playerが歩いている時のアニメーショaン
+            key: 'jumpRight',
+            frames: this.anims.generateFrameNumbers('mans', { start: 1, end: 1 }),
+            frameRate: 10,
+            repeat: 1
+        });
+        this.anims.create({ //playerが止まっている時のアニメーション
+            key: "turn",
+            frames: [{ key: "mans", frame: 0 }],
+            frameRate: 20
+        });
 
         //cursorsにユーザーのキーボードの操作を検知させる
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -45,30 +79,31 @@ class Game extends Phaser.Scene {
         if (this.cursors.up.isDown && this.player.body.touching.down) {
             // 上が押されたら && 地面についていたら
             this.player.setVelocityY(-1700);
-            // this.player.anims.play("turn", true)
+            this.player.anims.play("turn", true)
         } else if (this.cursors.left.isDown) {
             // 左が押されたら
             this.player.setVelocityX(-400);
+            if(!this.player.body.touching.down){
+                this.player.anims.play("jumpLeft", true)
+            }
             if(this.player.body.touching.down){
                 // 地面についていたら
-                // this.player.anims.play("walkLeft", true)
+                this.player.anims.play("walkLeft", true)
             }
         } else if (this.cursors.right.isDown) {
             // 右が押されたら
             this.player.setVelocityX(400);
+            if(!this.player.body.touching.down){
+                this.player.anims.play("jumpRight", true)
+            }
             if(this.player.body.touching.down){
                 // 地面についていたら
-                // this.player.anims.play("walkRight", true)
+                this.player.anims.play("walkRight", true)
             }
         } else {
             // 何も押されていない時
             this.player.setVelocityX(0);
-            // this.player.anims.play("turn", true)
-        }
-        if (this.player.y > this.scale.height-33) { // プレイヤーが画面の下端を超えた場合
-            this.player.setVelocity(0);  // プレイヤーを止める
-            this.scene.pause();  // ゲームを一時停止する
-            console.log("プレイヤーが画面外に落ちました。ゲームが停止しました。");
+            this.player.anims.play("turn", true)
         }
     }
 }
