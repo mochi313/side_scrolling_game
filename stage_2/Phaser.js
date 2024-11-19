@@ -19,10 +19,11 @@ class Game extends Phaser.Scene {
         this.load.image("pblock", "images/maptile_renga_brown_02_matt.png");
         this.load.image("goal", "images/goal_image2.png");
         this.load.image('star', 'images/star.png');
-        this.load.image('bomb', 'images/bomb.png'); // 爆弾画像を読み込む
+        this.load.image('bomb', 'images/bakudan_chakka.png'); // 爆弾画像を読み込む
     }
 
     create() {
+        gameOver = false; // 明示的に初期化
         const stage = {
             x: 0,
             y: 0,
@@ -33,11 +34,31 @@ class Game extends Phaser.Scene {
         const background = this.add.image(this.scale.width / 2, this.scale.height / 2, 'back').setScrollFactor(0);
         background.setDisplaySize(this.scale.width, this.scale.height);
 
-
         this.platforms = this.physics.add.staticGroup();
-        for (let i = 0; i < Math.floor(stage.width / 64 + 1); i++) {
-            this.platforms.create(64 * i + 32, stage.height - 32, "block");
+        const totalBlocks = Math.floor(stage.width / 64) + 1;
+
+        // すべてのブロックを生成
+        const blocks = [];
+        for (let i = 0; i < totalBlocks; i++) {
+            const block = this.platforms.create(64 * i + 32, stage.height - 32, "block");
+            blocks.push(block); // ブロックを配列に格納
         }
+
+        // 複数の穴をランダムな位置に生成
+        const holeCount = 5; // 生成する穴の数
+        for (let j = 0; j < holeCount; j++) {
+            // ランダムな位置に穴を開ける。ただし最後のブロックを超えない範囲で指定
+            const holeStartIndex = Phaser.Math.Between(0, totalBlocks - 3); // 配列の範囲を考慮
+            const holeSize = Phaser.Math.Between(2, 3); // 穴のサイズを2〜3ブロックに設定
+
+            for (let i = 0; i < holeSize; i++) {
+                const block = blocks[holeStartIndex + i];
+                if (block && block.active) {  // ブロックが存在し、まだ有効な場合のみ無効化
+                    block.disableBody(true, true);
+                }
+            }
+        }
+
 
         this.platforms.create(150, 450, "platform");
         this.platforms.create(250, 350, "platform");
@@ -91,7 +112,7 @@ class Game extends Phaser.Scene {
 
         this.stars = this.physics.add.group({
             key: 'star',
-            repeat: 11,
+            repeat: 70,
             setXY: { x: 12, y: 0, stepX: 70 }
         });
 
@@ -123,7 +144,7 @@ class Game extends Phaser.Scene {
 
         // 1秒ごとに爆弾を生成するタイマー
         this.bombSpawner = this.time.addEvent({
-            delay: 1000, // 1秒
+            delay: 800, // 1秒
             callback: this.spawnBomb,
             callbackScope: this,
             loop: true
@@ -144,31 +165,51 @@ class Game extends Phaser.Scene {
             return;
         }
 
+        // キー入力処理
         if (cursors.up.isDown && this.player.body.touching.down) {
             this.player.setVelocityY(-1300);
-            this.player.anims.play("turn", true)
+            this.player.anims.play("turn", true);
         } else if (cursors.left.isDown) {
             this.player.setVelocityX(-330);
             this.player.flipX = true;
             if (this.player.body.touching.down) {
-                this.player.anims.play("walk", true)
+                this.player.anims.play("walk", true);
             }
         } else if (cursors.right.isDown) {
             this.player.setVelocityX(330);
             this.player.flipX = false;
             if (this.player.body.touching.down) {
-                this.player.anims.play("walk", true)
+                this.player.anims.play("walk", true);
             }
         } else {
             this.player.setVelocityX(0);
-            this.player.anims.play("turn", true)
+            this.player.anims.play("turn", true);
         }
+
+        // プレイヤーが画面外に落ちた場合（画面の下端を超えた場合）ゲームオーバー処理
+        if (this.player.y == 868) {
+            this.fallOutOfBounds(); // プレイヤーが画面外に落ちた時の処理
+        }
+    }
+
+    fallOutOfBounds() {
+        if (gameOver) return; // ゲームオーバー状態なら処理しない
+        gameOver = true; // ゲームオーバー状態に設定
+        this.physics.pause(); // 物理演算を一時停止
+        this.player.setTint(0xff0000); // プレイヤーを赤くする
+        this.player.anims.play('turn'); // 待機アニメーションを再生
+        this.showGameOverText("Game Over"); // ゲームオーバーテキストを表示
+        this.score = 0;
+
+        this.time.delayedCall(2000, () => {
+            gameOver = false; // 再起動前にリセット
+            this.scene.restart();
+        });
     }
 
     reachGoal(player, goal) {
         if (this.scene.isPaused() || gameOver) return;
         gameOver = true;
-        this.physics.pause();
         player.anims.play('turn');
         this.showGameOverText("Goal!");
 
@@ -187,6 +228,7 @@ class Game extends Phaser.Scene {
         player.setTint(0xff0000);
         player.anims.play('turn');
         this.showGameOverText("Game Over!");
+        this.score = 0;
 
         this.time.delayedCall(2000, () => {
             // シーン再起動前に物理演算を再開し、gameOverをfalseにする
@@ -222,7 +264,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 3000 },
-            debug: false //デバッグモードをオフにする
+            debug: true //デバッグモードをオフにする
         }
     },
     scale: {
@@ -232,7 +274,7 @@ var config = {
     render: {
         pixelArt: false,
         antialias: true,
-        antialiasGL: true,
+        antialiasGL: false,
     },
     scene: Game
 };
