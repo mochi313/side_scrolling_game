@@ -20,7 +20,6 @@ class Game extends Phaser.Scene {
         this.load.image("enemy2", "images/enemy2.png")
         this.load.image("flame", "images/flame2.png")
         this.load.image("block", "images/block2.png")
-        this.load.image("float_block", "images/float_block.png")
         this.load.image("block32px", "images/block2_32px.png")
         this.load.image("platform", "images/platform.png")
         this.load.image("goal", "images/goal_image2.png")
@@ -41,7 +40,7 @@ class Game extends Phaser.Scene {
         const stage = {
             x: 0,
             y: 0,
-            width: 800 * 3, //ステージの大きさ
+            width: 800 * 6, //ステージの大きさ
             height: this.scale.height
         }
 
@@ -65,7 +64,7 @@ class Game extends Phaser.Scene {
         const ground = {
             height:3,
             hole:[
-                10,11,12
+                10,11,12,21,22,24,25,27,28
             ]
         }
         this.platforms = this.physics.add.staticGroup();
@@ -81,7 +80,6 @@ class Game extends Phaser.Scene {
                 this.platforms.create(bS * floatingBlock[i][n] + (bS/3), stage.height - (bS/2 + bS * (i + 3)), "block")
             }
         }
-        this.platforms.create(bS * 23 + (bS/3),stage.height - (bS/2 + bS * 7),"float_block")
 
         // playerの作成
         this.player = this.physics.add.sprite(100, 450, 'mans');
@@ -91,9 +89,8 @@ class Game extends Phaser.Scene {
 
         // クリボーのパチモン
         const enemy1Data = [
-            // [10,0],
-            // [7,3],
-            // [14,0]
+            [7,3],
+            [9,3]
         ]
         this.enemies = this.physics.add.group();
         for(let n = 0; n < enemy1Data.length; n ++){
@@ -118,8 +115,8 @@ class Game extends Phaser.Scene {
         // 炎を出すてき
         const enemy2Data = [
             // [300,0],
-            // [700,0],
-            // [1100,0]
+            // [00,0],
+            [1200,0]
         ]
         this.enemies2 = this.physics.add.group();
         for(let n = 0; n < enemy2Data.length; n ++){
@@ -196,6 +193,9 @@ class Game extends Phaser.Scene {
     }
 
     update(){
+        if(this.isPlayerDead == true){
+            return
+        }
         const elapsedTime = Math.floor((this.time.now - this.timerStart) / 1000);  // 秒単位で経過時間を計算
 
         // タイマー表示を更新
@@ -232,8 +232,8 @@ class Game extends Phaser.Scene {
             this.player.anims.play("turn", true)
         }
         if (this.player.y > this.scale.height-33) { // プレイヤーが画面の下端を超えた場合
-            this.player.setVelocity(0);  // プレイヤーを止める
-            this.scene.pause();  // ゲームを一時停止する
+            this.playerDeath();
+            // this.scene.pause();  // ゲームを一時停止する
             console.log("プレイヤーが画面外に落ちました。ゲームが停止しました。");
         }
          // Enemy movement
@@ -306,7 +306,7 @@ class Game extends Phaser.Scene {
                         }
                         if (enemy.x > cameraBounds.left - 100 && enemy.x < cameraBounds.right + 100) {
                             const new_flare = this.flare.create(X, Y, "flame");
-                            new_flare.setVelocityX(focus * 150); // 150の速度で動かす
+                            new_flare.setVelocityX(focus * 300); // 150の速度で動かす
                             new_flare.setGravityY(0);
                             if (focus === 1) {
                                 new_flare.setFlipX(true); // 右方向に進むので、画像を反転
@@ -336,6 +336,8 @@ class Game extends Phaser.Scene {
     }
 
     playerDeath(){
+        this.isPlayerDead = true;
+        this.player.anims.play("turn", true)
         this.player.setTint(0xff0000); // 赤色でダメージを表示
         this.player.setVelocity(0, 0); // 速度を止める（衝突時の速度）
         this.player.setVelocityY(-10000);

@@ -57,6 +57,9 @@ main {
 }
 
 .selectItem {
+    text-decoration: none;
+    color: #000;
+    display: block;
     border: solid 1px #000;
     width: calc((1000px - 64px) / 3 - 2px);
     height: calc(600px / 2 - 18px);
