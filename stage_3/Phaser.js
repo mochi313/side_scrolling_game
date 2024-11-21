@@ -76,7 +76,7 @@ class Game extends Phaser.Scene {
 
         // pblockのランダム配置処理（高さもランダム）
         const placeRandomPblocks = (platforms, totalWidth, blockSize, stageHeight) => {
-            const pblockCount = 5; // ランダム配置するpblockの数
+            const pblockCount = 10; // ランダム配置するpblockの数
             const placedPositions = []; // 既に使用された位置を記録する配列
 
             for (let i = 0; i < pblockCount; i++) {
@@ -86,7 +86,7 @@ class Game extends Phaser.Scene {
                     isOverlap = false;
                     startX = Phaser.Math.Between(0, totalWidth - blockSize * 4); // pblockは最大4ブロック分の幅をとる
                     startY = Phaser.Math.Between(stageHeight - 300, stageHeight - blockSize); // 高さをランダムに設定
-                    const endX = startX + blockSize * Phaser.Math.Between(2, 4); // pblockのサイズを2～4ブロック分で決定
+                    const endX = startX + blockSize * Phaser.Math.Between(2, 6); // pblockのサイズを2～4ブロック分で決定
 
                     // 既存のブロックと重ならないか確認
                     for (let pos of placedPositions) {
@@ -215,7 +215,7 @@ class Game extends Phaser.Scene {
 
         // キー入力処理
         if (cursors.up.isDown && this.player.body.touching.down) {
-            this.player.setVelocityY(-1500);
+            this.player.setVelocityY(-1000);
             this.player.anims.play("turn", true);
         } else if (cursors.left.isDown) {
             this.player.setVelocityX(-770);
@@ -319,7 +319,7 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 3000 },
+            gravity: { y: 1000 },
         }
     },
     scale: {
