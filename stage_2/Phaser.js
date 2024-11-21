@@ -132,7 +132,7 @@ class Game extends Phaser.Scene {
 
         this.anims.create({
             key: 'walk',
-            frames: this.anims.generateFrameNumbers('man', { start: 1, end: 3 }),
+            frames: this.anims.generateFrameNumbers('man', { start: 0, end: 2 }),
             frameRate: 10,
             repeat: -1
         });
