@@ -22,9 +22,23 @@ class Game extends Phaser.Scene {
         this.load.image("block", "images/block2.png")
         this.load.image("platform", "images/platform.png")
         this.load.image("goal", "images/goal_image2.png")
+        this.load.image("lava", "images/lava2.png")
+        this.load.image("fb", "images/fireball.png")
     }
 
     create(){
+        this.fireballs = this.physics.add.group();
+        const fb = this.fireballs.create(400, 300, 'fb')
+        fb.setOrigin(0.1, 0.5);
+        this.tweens.add({
+            targets: fb,
+            angle: 360,
+            duration: 2000,
+            repeat: -1,
+            ease: 'Linear'
+        });
+
+
         this.timerStart = this.time.now;  // ゲーム開始時の時間を記録
         this.timerText = this.add.text(10, 10, 'Time: 0', {
             font: '24px Arial',
@@ -43,11 +57,6 @@ class Game extends Phaser.Scene {
             height: this.scale.height
         }
 
-        // 背景の追加
-        const background = this.add.image(this.scale.width / 2, this.scale.height / 2,'back').setScrollFactor(0);
-        // 画像のリサイズ
-        background.setDisplaySize(this.scale.width, this.scale.height);
-        
         // 地形の追加
         const bS = 64 //blockSize
         const floatingBlock = [
@@ -69,6 +78,8 @@ class Game extends Phaser.Scene {
             ]
         }
         this.platforms = this.physics.add.staticGroup();
+        this.lavas = this.physics.add.group();
+
         for(let i = 0; i < Math.floor(stage.width / bS + 1); i ++){
             for(let n = 0; n < ground.height; n ++){
                 this.platforms.create(bS * i + (bS/3), stage.height - (bS/2 + bS * (n + 12)), "block")
@@ -79,6 +90,8 @@ class Game extends Phaser.Scene {
                 for(let n = 0; n < ground.height; n ++){
                     this.platforms.create(bS * i + (bS/3), stage.height - (bS/2 + bS * n), "block")
                 }
+            }else{
+                this.lavas.create(bS * i + (bS/3), stage.height - bS/2, "lava")
             }
         }
         for(let i = 0; i < floatingBlock.length; i++){
@@ -86,7 +99,7 @@ class Game extends Phaser.Scene {
                 this.platforms.create(bS * floatingBlock[i][n] + (bS/3), stage.height - (bS/2 + bS * (i + 2)), "block")
             }
         }
-        this.platforms.setTint(0x736F76);
+        this.platforms.setTint(0x808080);
 
         this.moveP = this.physics.add.group();
         this.p1 = this.moveP.create(bS * 58 + (bS/3), stage.height - (bS/2 + bS * 3), "platform")
