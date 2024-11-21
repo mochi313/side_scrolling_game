@@ -52,11 +52,11 @@ class Game extends Phaser.Scene {
         // 地形の追加
         const bS = 64 //blockSize
         const floatingBlock = [
-            [33,34,35,36,37,40,41,42,43,44],
-            [34,35,36,37,40,41,42,43],
-            [6,7,8,35,36,37,40,41,42,48,49,50,51],
-            [36,37,40,41],
-            [37,40],
+            [33,34,35,36,37,40,41,42,43,44,64,65,66,67,68],
+            [34,35,36,37,40,41,42,43,65,66,67,68],
+            [6,7,8,35,36,37,40,41,42,48,49,50,51,66,67,68],
+            [36,37,40,41,67,68],
+            [37,40,68],
             [7,51,52,53,54,57,58,59],
             [],
             []
@@ -64,7 +64,7 @@ class Game extends Phaser.Scene {
         const ground = {
             height:3,
             hole:[
-                10,11,12,21,22,24,25,27,28,38,39,53,54
+                10,11,12,21,22,24,25,27,28,38,39,53,54,61,62
             ]
         }
         this.platforms = this.physics.add.staticGroup();
@@ -113,7 +113,7 @@ class Game extends Phaser.Scene {
                 this.player.setVelocityY(-1500)
             }
             else{
-                this.playerDeath();
+                // this.playerDeath();
             }
         }, null, this);
 
@@ -139,7 +139,7 @@ class Game extends Phaser.Scene {
                 this.player.setVelocityY(-1500)
             }
             else{
-                this.playerDeath();
+                // this.playerDeath();
             }
         }, null, this);
 
@@ -149,7 +149,7 @@ class Game extends Phaser.Scene {
             f.setGravityY(0);  // Y軸の重力を無効化
         })
         this.physics.add.overlap(this.flare, this.player, (p, f) => {
-            this.playerDeath();
+            // this.playerDeath();
         }, null, this);
 
         // ゴールの画像を追加
@@ -217,7 +217,7 @@ class Game extends Phaser.Scene {
             this.player.anims.play("turn", true)
         } else if (this.cursors.left.isDown) {
             // 左が押されたら
-            this.player.setVelocityX(-400);
+            this.player.setVelocityX(-1000);
             if(!this.player.body.touching.down){
                 this.player.anims.play("jumpLeft", true)
             }
@@ -227,7 +227,7 @@ class Game extends Phaser.Scene {
             }
         } else if (this.cursors.right.isDown) {
             // 右が押されたら
-            this.player.setVelocityX(400);
+            this.player.setVelocityX(1000);
             if(!this.player.body.touching.down){
                 this.player.anims.play("jumpRight", true)
             }
