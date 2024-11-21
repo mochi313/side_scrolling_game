@@ -182,7 +182,7 @@ class Game extends Phaser.Scene {
 
         // 1秒ごとに爆弾を生成するタイマー
         this.bombSpawner = this.time.addEvent({
-            delay: 1500, // 1秒
+            delay: 1000, // 1秒
             callback: this.spawnBomb,
             callbackScope: this,
             loop: true
@@ -288,7 +288,7 @@ class Game extends Phaser.Scene {
     spawnBomb() {
         if (!this.stage) return; // stageが未定義の場合のガード
 
-        const bomb = this.bombs.create(Phaser.Math.Between(0, this.stage.width), 0, 'bomb');
+        const bomb = this.bombs.create(Phaser.Math.Between(0, this.physics.world.bounds.width), 0, 'bomb');
         bomb.setBounce(1);
         bomb.setCollideWorldBounds(true);
         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
@@ -303,7 +303,6 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 3000 },
-            debug: true //デバッグモードをオフにする
         }
     },
     scale: {
