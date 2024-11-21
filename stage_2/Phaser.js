@@ -19,6 +19,7 @@ class Game extends Phaser.Scene {
         this.load.image("goal", "images/goal_image2.png");
         this.load.image('star', 'images/star.png');
         this.load.image('bomb', 'images/bakudan_chakka.png'); // 爆弾画像を読み込む
+        // this.load.audio('bgm', 'audio/bgm.wav'); // BGMファイルを読み込む
         this.load.audio('collect', 'audio/collect.mp3'); // スターを集めたときの効果音
         this.load.audio('bomb', 'audio/bomb.mp3'); // 爆弾に当たったときの効果音
         this.load.audio('fall', 'audio/fall.mp3');
@@ -26,7 +27,8 @@ class Game extends Phaser.Scene {
 
     create() {
         gameOver = false; // 明示的に初期化
-
+        // this.bgm = this.sound.add('bgm'); // BGMを読み込んだ音声を変数に保存
+        // this.bgm.play({ loop: true }); // ループ再生
         this.collectSound = this.sound.add('collect'); // スターを集めたときの音
         this.bombSound = this.sound.add('bomb'); // 爆弾の音
         this.fallSound = this.sound.add('fall');
