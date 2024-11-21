@@ -16,7 +16,7 @@ main {
     top: 50%;
     transform: translateX(-50%) translateY(-50%);
     width: 800px;
-    height: 400px;
+    height: 300px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -65,6 +65,12 @@ main {
     height: calc(600px / 2 - 18px);
     background-color: rgb(0 0 0 /.3);
     transition: scale 150ms;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.selectItem p{
+    margin: auto 0;
 }
 
 .selectItem:hover{

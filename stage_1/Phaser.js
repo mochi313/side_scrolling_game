@@ -52,11 +52,11 @@ class Game extends Phaser.Scene {
         // 地形の追加
         const bS = 64 //blockSize
         const floatingBlock = [
-            [],
-            [],
-            [6,7,8],
-            [],
-            [],
+            [33,34,35,36,37,40,41,42,43,44],
+            [34,35,36,37,40,41,42,43],
+            [6,7,8,35,36,37,40,41,42,48,49,50,51],
+            [36,37,40,41],
+            [37,40],
             [7],
             [],
             []
@@ -64,7 +64,7 @@ class Game extends Phaser.Scene {
         const ground = {
             height:3,
             hole:[
-                10,11,12,21,22,24,25,27,28
+                10,11,12,21,22,24,25,27,28,38,39
             ]
         }
         this.platforms = this.physics.add.staticGroup();
@@ -89,6 +89,9 @@ class Game extends Phaser.Scene {
 
         // クリボーのパチモン
         const enemy1Data = [
+            [37,8],
+            [49,4],
+            [50,4],
             [7,3],
             [9,3]
         ]
@@ -106,6 +109,7 @@ class Game extends Phaser.Scene {
         this.physics.add.overlap(this.enemies, this.player, (p, e) => {
             if (e.y - p.y > 54) {
                 e.destroy();  // enemyを破壊
+                this.player.setVelocityY(-1500)
             }
             else{
                 this.playerDeath();
@@ -114,20 +118,23 @@ class Game extends Phaser.Scene {
 
         // 炎を出すてき
         const enemy2Data = [
+            [53,1],
+            [16,1]
             // [300,0],
             // [00,0],
-            [1200,0]
+            // [1200,0]
         ]
         this.enemies2 = this.physics.add.group();
         for(let n = 0; n < enemy2Data.length; n ++){
             const eD = enemy2Data[n]
-            this.enemies2.create(eD[0],eD[1],"enemy2");
+            this.enemies2.create(bS * eD[0] + (bS/3),stage.height - (bS/2 + bS * (eD[1] + 3)),"enemy2");
         }
         // 敵の衝突処理
         this.physics.add.collider(this.enemies2, this.platforms);
         this.physics.add.overlap(this.enemies2, this.player, (p, e) => {
             if (e.y - p.y > 54) {
                 e.destroy();  // enemyを破壊
+                this.player.setVelocityY(-1500)
             }
             else{
                 this.playerDeath();
@@ -323,16 +330,11 @@ class Game extends Phaser.Scene {
     }
 
     reachGoal(player, goal) {
-        this.text = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Game Clear!', {
-            fontSize: '64px',
-            fontFamily: 'Arial',
-            fill: '#ff0000',
-            stroke: '#000000',
-            strokeThickness: 6
-        }).setOrigin(0.5); // 中央に配置
-        this.text.setDepth(3)
-        this.text.setScrollFactor(0)
-        // this.scene.pause(); // ゲームを一時停
+        const c = document.getElementById("clear")
+        c.classList.remove("dN")
+        const m = document.getElementById("menu")
+        m.classList.remove("dN")
+        this.scene.pause(); // ゲームを一時停
     }
 
     playerDeath(){
@@ -344,6 +346,10 @@ class Game extends Phaser.Scene {
         this.time.delayedCall(50, () => {
             this.scene.pause(); // 0.5秒後にシーンをポーズ
         }, [], this);
+        const d = document.getElementById("over")
+        d.classList.remove("dN")
+        const m = document.getElementById("menu")
+        m.classList.remove("dN")
     }
 }
 
