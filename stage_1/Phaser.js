@@ -113,7 +113,7 @@ class Game extends Phaser.Scene {
                 this.player.setVelocityY(-1500)
             }
             else{
-                // this.playerDeath();
+                this.playerDeath();
             }
         }, null, this);
 
@@ -139,7 +139,7 @@ class Game extends Phaser.Scene {
                 this.player.setVelocityY(-1500)
             }
             else{
-                // this.playerDeath();
+                this.playerDeath();
             }
         }, null, this);
 
@@ -149,7 +149,7 @@ class Game extends Phaser.Scene {
             f.setGravityY(0);  // Y軸の重力を無効化
         })
         this.physics.add.overlap(this.flare, this.player, (p, f) => {
-            // this.playerDeath();
+            this.playerDeath();
         }, null, this);
 
         // ゴールの画像を追加
@@ -217,7 +217,7 @@ class Game extends Phaser.Scene {
             this.player.anims.play("turn", true)
         } else if (this.cursors.left.isDown) {
             // 左が押されたら
-            this.player.setVelocityX(-1000);
+            this.player.setVelocityX(-400);
             if(!this.player.body.touching.down){
                 this.player.anims.play("jumpLeft", true)
             }
@@ -227,7 +227,7 @@ class Game extends Phaser.Scene {
             }
         } else if (this.cursors.right.isDown) {
             // 右が押されたら
-            this.player.setVelocityX(1000);
+            this.player.setVelocityX(400);
             if(!this.player.body.touching.down){
                 this.player.anims.play("jumpRight", true)
             }
