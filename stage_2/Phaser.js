@@ -19,10 +19,16 @@ class Game extends Phaser.Scene {
         this.load.image("goal", "images/goal_image2.png");
         this.load.image('star', 'images/star.png');
         this.load.image('bomb', 'images/bakudan_chakka.png'); // 爆弾画像を読み込む
+        this.load.audio('collect', 'audio/collect.mp3'); // スターを集めたときの効果音
+        this.load.audio('bomb', 'audio/bomb.mp3'); // 爆弾に当たったときの効果音
     }
 
     create() {
         gameOver = false; // 明示的に初期化
+
+        this.collectSound = this.sound.add('collect'); // スターを集めたときの音
+        this.bombSound = this.sound.add('bomb'); // 爆弾の音
+
         const stage = {
             x: 0,
             y: 0,
@@ -194,6 +200,7 @@ class Game extends Phaser.Scene {
         star.disableBody(true, true);
         this.score += 10;
         this.scoreText.setText('Score: ' + this.score);
+        this.collectSound.play(); // 効果音を再生
     }
 
 
@@ -268,8 +275,9 @@ class Game extends Phaser.Scene {
         this.showGameOverText("Game Over!");
         this.score = 0;
 
+        this.bombSound.play(); // 爆発音を再生
+
         this.time.delayedCall(2000, () => {
-            // シーン再起動前に物理演算を再開し、gameOverをfalseにする
             this.physics.resume();
             gameOver = false;
             this.scene.restart();
