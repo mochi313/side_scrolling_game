@@ -57,14 +57,14 @@ class Game extends Phaser.Scene {
             [6,7,8,35,36,37,40,41,42,48,49,50,51],
             [36,37,40,41],
             [37,40],
-            [7],
+            [7,51,52,53,54,57,58,59],
             [],
             []
         ]
         const ground = {
             height:3,
             hole:[
-                10,11,12,21,22,24,25,27,28,38,39
+                10,11,12,21,22,24,25,27,28,38,39,53,54
             ]
         }
         this.platforms = this.physics.add.staticGroup();
@@ -93,7 +93,8 @@ class Game extends Phaser.Scene {
             [49,4],
             [50,4],
             [7,3],
-            [9,3]
+            [9,3],
+            [53,9]
         ]
         this.enemies = this.physics.add.group();
         for(let n = 0; n < enemy1Data.length; n ++){
@@ -119,7 +120,8 @@ class Game extends Phaser.Scene {
         // 炎を出すてき
         const enemy2Data = [
             [53,1],
-            [16,1]
+            [16,1],
+            [59,9]
             // [300,0],
             // [00,0],
             // [1200,0]
