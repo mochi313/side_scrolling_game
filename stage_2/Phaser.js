@@ -13,7 +13,7 @@ class Game extends Phaser.Scene {
     preload() {
         this.load.image('ground', 'images/test.jpeg');
         this.load.image('back', 'images/back.png');
-        this.load.spritesheet('man', 'images/spritesheet.png', { frameWidth: 131, frameHeight: 128 });
+        this.load.spritesheet('man', 'images/spritesheet.png', { frameWidth: 131, frameHeight: 127 });
         this.load.image("block", "images/block.png");
         this.load.image("pblock", "images/maptile_renga_brown_02_matt.png");
         this.load.image("goal", "images/goal_image2.png");
@@ -21,6 +21,7 @@ class Game extends Phaser.Scene {
         this.load.image('bomb', 'images/bakudan_chakka.png'); // 爆弾画像を読み込む
         this.load.audio('collect', 'audio/collect.mp3'); // スターを集めたときの効果音
         this.load.audio('bomb', 'audio/bomb.mp3'); // 爆弾に当たったときの効果音
+        this.load.audio('fall', 'audio/fall.mp3');
     }
 
     create() {
@@ -28,6 +29,7 @@ class Game extends Phaser.Scene {
 
         this.collectSound = this.sound.add('collect'); // スターを集めたときの音
         this.bombSound = this.sound.add('bomb'); // 爆弾の音
+        this.fallSound = this.sound.add('fall');
 
         const stage = {
             x: 0,
@@ -241,10 +243,15 @@ class Game extends Phaser.Scene {
         if (gameOver) return; // ゲームオーバー状態なら処理しない
         gameOver = true; // ゲームオーバー状態に設定
         this.physics.pause(); // 物理演算を一時停止
-        this.player.setTint(0xff0000); // プレイヤーを赤くする
         this.player.anims.play('turn'); // 待機アニメーションを再生
+        this.player.destroy();
         this.showGameOverText("Game Over"); // ゲームオーバーテキストを表示
         this.score = 0;
+
+        // fallSoundをここで一度だけ再生
+        if (!this.fallSound.isPlaying) {
+            this.fallSound.play(); // 効果音を再生
+        }
 
         this.time.delayedCall(2000, () => {
             gameOver = false; // 再起動前にリセット
