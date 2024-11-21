@@ -15,12 +15,10 @@ class Game extends Phaser.Scene {
         this.load.spritesheet('mans', 'images/カービィず.png',
             { frameWidth: 64, frameHeight: 64 }
         );
-        this.load.image("man2", "images/カービィ3.png")
         this.load.image("enemy1", "images/enemy64.png")
         this.load.image("enemy2", "images/enemy2.png")
         this.load.image("flame", "images/flame2.png")
         this.load.image("block", "images/block2.png")
-        this.load.image("block32px", "images/block2_32px.png")
         this.load.image("platform", "images/platform.png")
         this.load.image("goal", "images/goal_image2.png")
     }
