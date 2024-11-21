@@ -15,7 +15,6 @@ class Game extends Phaser.Scene {
         this.load.image('back', 'images/back.png');
         this.load.spritesheet('man', 'images/spritesheet.png', { frameWidth: 131, frameHeight: 128 });
         this.load.image("block", "images/block.png");
-        this.load.image("platform", "images/platform.png");
         this.load.image("pblock", "images/maptile_renga_brown_02_matt.png");
         this.load.image("goal", "images/goal_image2.png");
         this.load.image('star', 'images/star.png');
@@ -27,7 +26,14 @@ class Game extends Phaser.Scene {
         const stage = {
             x: 0,
             y: 0,
-            width: 1000 * 3,
+            width: 1000 * 6,
+            height: this.scale.height
+        };
+
+        this.stage = {
+            x: 0,
+            y: 0,
+            width: 1000 * 6,
             height: this.scale.height
         };
 
@@ -45,7 +51,7 @@ class Game extends Phaser.Scene {
         }
 
         // 複数の穴をランダムな位置に生成
-        const holeCount = 5; // 生成する穴の数
+        const holeCount = 10; // 生成する穴の数
         for (let j = 0; j < holeCount; j++) {
             // ランダムな位置に穴を開ける。ただし最後のブロックを超えない範囲で指定
             const holeStartIndex = Phaser.Math.Between(0, totalBlocks - 3); // 配列の範囲を考慮
@@ -59,22 +65,54 @@ class Game extends Phaser.Scene {
             }
         }
 
+        // pblockのランダム配置処理（高さもランダム）
+        const placeRandomPblocks = (platforms, totalWidth, blockSize, stageHeight) => {
+            const pblockCount = 5; // ランダム配置するpblockの数
+            const placedPositions = []; // 既に使用された位置を記録する配列
 
-        this.platforms.create(150, 450, "platform");
-        this.platforms.create(250, 350, "platform");
-        this.platforms.create(650, 420, "platform");
+            for (let i = 0; i < pblockCount; i++) {
+                let startX, startY;
+                let isOverlap;
+                do {
+                    isOverlap = false;
+                    startX = Phaser.Math.Between(0, totalWidth - blockSize * 4); // pblockは最大4ブロック分の幅をとる
+                    startY = Phaser.Math.Between(stageHeight - 300, stageHeight - blockSize); // 高さをランダムに設定
+                    const endX = startX + blockSize * Phaser.Math.Between(2, 4); // pblockのサイズを2～4ブロック分で決定
 
+                    // 既存のブロックと重ならないか確認
+                    for (let pos of placedPositions) {
+                        if (
+                            (startX >= pos.start && startX <= pos.end && Math.abs(startY - pos.y) < blockSize) || // 水平位置が被る
+                            (endX >= pos.start && endX <= pos.end && Math.abs(startY - pos.y) < blockSize) || // 水平位置が被る
+                            (startX <= pos.start && endX >= pos.end && Math.abs(startY - pos.y) < blockSize) // 範囲を覆う場合
+                        ) {
+                            isOverlap = true;
+                            break;
+                        }
+                    }
+                } while (isOverlap);
 
-        const pblock1 = this.platforms.create(650 + 64, 660, "pblock");
-        const pblock2 = this.platforms.create(650 + 64 * 2, 660, "pblock");
-        const pblock3 = this.platforms.create(650 + 64 * 3, 660, "pblock");
-        const pblock4 = this.platforms.create(650 + 64 * 4, 660, "pblock");
+                // 配置位置を保存
+                const pblockLength = Phaser.Math.Between(2, 4); // 2〜4個のpblockを配置
+                const newPosition = {
+                    start: startX,
+                    end: startX + blockSize * pblockLength,
+                    y: startY
+                };
+                placedPositions.push(newPosition);
 
-        [pblock1, pblock2, pblock3, pblock4].forEach(pblock => {
-            pblock.refreshBody();
-            pblock.setSize(64, 35);
-            pblock.setOffset(0, 0);
-        });
+                // pblockを生成して配置
+                for (let j = 0; j < pblockLength; j++) {
+                    const pblock = platforms.create(startX + blockSize * j, startY, "pblock");
+                    pblock.refreshBody();
+                    pblock.setSize(blockSize, 35);
+                    pblock.setOffset(0, 0);
+                }
+            }
+        };
+
+        // ランダムな位置と高さにpblockを配置
+        placeRandomPblocks(this.platforms, stage.width, 64, stage.height);
 
         this.player = this.physics.add.sprite(100, stage.height + 100, 'man');
         this.player.setCollideWorldBounds(true);
@@ -144,7 +182,7 @@ class Game extends Phaser.Scene {
 
         // 1秒ごとに爆弾を生成するタイマー
         this.bombSpawner = this.time.addEvent({
-            delay: 800, // 1秒
+            delay: 1500, // 1秒
             callback: this.spawnBomb,
             callbackScope: this,
             loop: true
@@ -247,9 +285,10 @@ class Game extends Phaser.Scene {
         }).setOrigin(0.5).setScrollFactor(0);
     }
 
-
     spawnBomb() {
-        const bomb = this.bombs.create(Phaser.Math.Between(0, this.scale.width), 0, 'bomb');
+        if (!this.stage) return; // stageが未定義の場合のガード
+
+        const bomb = this.bombs.create(Phaser.Math.Between(0, this.stage.width), 0, 'bomb');
         bomb.setBounce(1);
         bomb.setCollideWorldBounds(true);
         bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
