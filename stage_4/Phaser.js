@@ -7,6 +7,7 @@ class Game extends Phaser.Scene {
     playerPlatformCollider;
     timerText;
     text;
+    moveP;
 
     preload(){
         // 画像の読み込み
@@ -46,23 +47,25 @@ class Game extends Phaser.Scene {
         const background = this.add.image(this.scale.width / 2, this.scale.height / 2,'back').setScrollFactor(0);
         // 画像のリサイズ
         background.setDisplaySize(this.scale.width, this.scale.height);
-
+        
         // 地形の追加
         const bS = 64 //blockSize
         const floatingBlock = [
-            [8,11,14,17,20],
-            [11,14,17,20],
-            [3,4,5,14,17,20],
-            [17],
-            [],
-            [],
-            [],
-            [],
-            []
+            [11,14,17,20,23,27],
+            [14,17,20,23,27,34,41,44,47,50],
+            [4,5,6,17,20,23,27,34,41,44,47,50],
+            [20,34,35,41,44,47,50],
+            [34,33,35,41,44,47,50],
+            [34,33,35,41,44,47,50],
+            [34,33,35,41,44,47,50],
+            [34,33,35,41,44,47,50],
+            [34,33,35,41,42,43,44,45,46,47,48,49,50],
+            [34,33,35,41,42,43,44,45,46,47,48,49,50],
         ]
         const ground = {
             height:2,
             hole:[
+                54,55,56,57,58,59,60,61,62,63,64,65,66,67
             ]
         }
         this.platforms = this.physics.add.staticGroup();
@@ -85,20 +88,65 @@ class Game extends Phaser.Scene {
         }
         this.platforms.setTint(0x736F76);
 
+        this.moveP = this.physics.add.group();
+        this.p1 = this.moveP.create(bS * 58 + (bS/3), stage.height - (bS/2 + bS * 3), "platform")
+        this.p2 = this.moveP.create(bS * 63 + (bS/3), stage.height - (bS/2 + bS * 3), "platform")
+        this.up = true;
+        this.down = true;
+        this.time.addEvent({
+            callback: () => {
+                this.p1.setVelocityX(0);
+                if(this.up){
+                    this.p1.setVelocityY(-200)
+                    if(this.p1.y <= stage.height - (bS/2 + bS * 9)){
+                        this.up = false
+                    }
+                } else {
+                    this.p1.setVelocityY(200)
+                    if(this.p1.y >= stage.height - (bS/2 + bS * 1)){
+                        this.up = true
+                    }
+                }
+            },
+            callbackScope: this, // thisコンテキストを保持
+            loop: true, // ループさせる
+        });
+        this.time.addEvent({
+            callback: () => {
+                this.p2.setVelocityX(0);
+                if(this.down){
+                    this.p2.setVelocityY(200)
+                    if(this.p2.y >= stage.height - (bS/2 + bS * 1)){
+                        this.down = false
+                    }
+                } else {
+                    this.p2.setVelocityY(-200)
+                    if(this.p2.y <= stage.height - (bS/2 + bS * 9)){
+                        this.down = true
+                    }
+                }
+            },
+            callbackScope: this, // thisコンテキストを保持
+            loop: true, // ループさせる
+        });
+
         // playerの作成
         this.player = this.physics.add.sprite(100, 450, 'mans');
         this.player.setGravityY(6000)
         this.player.setCollideWorldBounds(true);
-        this.playerPlatformCollider = this.physics.add.collider(this.player, this.platforms);
+        this.physics.add.collider(this.player, this.platforms);
+        this.physics.add.collider(this.player, this.moveP);
 
         // クリボーのパチモン
         const enemy1Data = [
             // [37,8],
             // [49,4],
-            // [50,4],
-            // [7,3],
-            // [9,3],
-            // [53,9]
+            [25,0],
+            [5,3],
+            [6,3],
+            [47,0],
+            [50,0],
+            [53,0]
         ]
         this.enemies = this.physics.add.group();
         for(let n = 0; n < enemy1Data.length; n ++){
@@ -123,10 +171,11 @@ class Game extends Phaser.Scene {
 
         // 炎を出すてき
         const enemy2Data = [
-            [8,1],
-            [11,2],
-            [14,3],
-            [17,4]
+            [11,1],
+            [14,2],
+            [17,3],
+            [20,4],
+            [38,0]
         ]
         this.enemies2 = this.physics.add.group();
         for(let n = 0; n < enemy2Data.length; n ++){
