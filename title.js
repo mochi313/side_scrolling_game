@@ -7,11 +7,11 @@ class Game extends Phaser.Scene {
     preload(){
         // 画像の読み込み
         // this.load.image('ground', 'images/test.jpeg');
-        this.load.image('back', '/stage_1/images/back_image3.png');
-        this.load.spritesheet('mans', '/stage_1/images/カービィず.png',
+        this.load.image('back', 'images/back_image3.png');
+        this.load.spritesheet('mans', 'images/カービィず.png',
             { frameWidth: 64, frameHeight: 64 }
         );
-        this.load.image("block", "stage_1/images/block2.png")
+        this.load.image("block", "images/block2.png")
     }
 
     create(){
