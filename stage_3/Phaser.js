@@ -201,7 +201,7 @@ class Game extends Phaser.Scene {
 
     collectStar(player, star) {
         star.disableBody(true, true);
-        this.score += 10;
+        this.score += 1;
         this.scoreText.setText('Score: ' + this.score);
         this.collectSound.play(); // 効果音を再生
     }
