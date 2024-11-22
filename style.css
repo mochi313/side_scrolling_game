@@ -37,6 +37,7 @@ main {
 }
 
 .title {
+    mix-blend-mode: difference;
     font-size: 130px;
     margin: 0;
     margin-left: 70px;

@@ -7,11 +7,12 @@ class Game extends Phaser.Scene {
     playerPlatformCollider;
     timerText;
     text;
+    moveP;
 
     preload(){
         // 画像の読み込み
         // this.load.image('ground', 'images/test.jpeg');
-        this.load.image('back', 'images/back_image3.png');
+        this.load.image('back', 'images/bg3.jpg');
         this.load.spritesheet('mans', 'images/カービィず.png',
             { frameWidth: 64, frameHeight: 64 }
         );
@@ -21,9 +22,15 @@ class Game extends Phaser.Scene {
         this.load.image("block", "images/block2.png")
         this.load.image("platform", "images/platform.png")
         this.load.image("goal", "images/goal_image2.png")
+        this.load.image("lava", "images/lava2.png")
+        this.load.image("fb", "images/fireball.png")
     }
 
     create(){
+        this.fireballs = this.physics.add.group();
+        this.fb = this.fireballs.create(400, 300, 'fb')
+        this.fb.setOrigin(0.1, 0.5);
+
         this.timerStart = this.time.now;  // ゲーム開始時の時間を記録
         this.timerText = this.add.text(10, 10, 'Time: 0', {
             font: '24px Arial',
@@ -42,57 +49,103 @@ class Game extends Phaser.Scene {
             height: this.scale.height
         }
 
-        // 背景の追加
-        const background = this.add.image(this.scale.width / 2, this.scale.height / 2,'back').setScrollFactor(0);
-        // 画像のリサイズ
-        background.setDisplaySize(this.scale.width, this.scale.height);
-
         // 地形の追加
         const bS = 64 //blockSize
         const floatingBlock = [
-            [33,34,35,36,37,40,41,42,43,44,64,65,66,67,68],
-            [34,35,36,37,40,41,42,43,65,66,67,68],
-            [6,7,8,35,36,37,40,41,42,48,49,50,51,66,67,68],
-            [36,37,40,41,67,68],
-            [37,40,68],
-            [7,51,52,53,54,57,58,59],
-            [],
-            []
+            [0,1,2,3,4],
+            [0,1,2,3],
+            [0,1,2],
+            [24],
+            [24],
+            [24],
+            [24],
+            [24],
         ]
         const ground = {
-            height:3,
+            height:4,
             hole:[
-                10,11,12,21,22,24,25,27,28,38,39,53,54,61,62
+                14,15,16,28,29,30,34,35,36
             ]
         }
         this.platforms = this.physics.add.staticGroup();
+        this.lavas = this.physics.add.group();
+
+        for(let i = 0; i < Math.floor(stage.width / bS + 1); i ++){
+            for(let n = 0; n < ground.height; n ++){
+                this.platforms.create(bS * i + (bS/3), stage.height - (bS/2 + bS * (n + 12)), "block")
+            }
+        }
         for(let i = 0; i < Math.floor(stage.width / bS + 1); i ++){
             if(!ground.hole.includes(i)){
                 for(let n = 0; n < ground.height; n ++){
                     this.platforms.create(bS * i + (bS/3), stage.height - (bS/2 + bS * n), "block")
                 }
+            }else{
+                this.lavas.create(bS * i + (bS/3), stage.height - bS/2, "lava")
             }
         }
         for(let i = 0; i < floatingBlock.length; i++){
             for(let n = 0; n < floatingBlock[i].length; n ++){
-                this.platforms.create(bS * floatingBlock[i][n] + (bS/3), stage.height - (bS/2 + bS * (i + 3)), "block")
+                this.platforms.create(bS * floatingBlock[i][n] + (bS/3), stage.height - (bS/2 + bS * (i + 4)), "block")
             }
         }
+        this.platforms.setTint(0xBEBEBE);
+
+        this.moveP = this.physics.add.group();
+        this.p1 = this.moveP.create(bS * 58 + (bS/3), stage.height - (bS/2 + bS * 3), "platform")
+        this.p2 = this.moveP.create(bS * 63 + (bS/3), stage.height - (bS/2 + bS * 3), "platform")
+        this.up = true;
+        this.down = true;
+        this.time.addEvent({
+            callback: () => {
+                this.p1.setVelocityX(0);
+                if(this.up){
+                    this.p1.setVelocityY(-200)
+                    if(this.p1.y <= stage.height - (bS/2 + bS * 9)){
+                        this.up = false
+                    }
+                } else {
+                    this.p1.setVelocityY(200)
+                    if(this.p1.y >= stage.height - (bS/2 + bS * 1)){
+                        this.up = true
+                    }
+                }
+            },
+            callbackScope: this, // thisコンテキストを保持
+            loop: true, // ループさせる
+        });
+        this.time.addEvent({
+            callback: () => {
+                this.p2.setVelocityX(0);
+                if(this.down){
+                    this.p2.setVelocityY(200)
+                    if(this.p2.y >= stage.height - (bS/2 + bS * 1)){
+                        this.down = false
+                    }
+                } else {
+                    this.p2.setVelocityY(-200)
+                    if(this.p2.y <= stage.height - (bS/2 + bS * 9)){
+                        this.down = true
+                    }
+                }
+            },
+            callbackScope: this, // thisコンテキストを保持
+            loop: true, // ループさせる
+        });
 
         // playerの作成
-        this.player = this.physics.add.sprite(100, 450, 'mans');
+        this.player = this.physics.add.sprite(100, stage.height - (bS/2 + bS * 7), 'mans')
         this.player.setGravityY(6000)
         this.player.setCollideWorldBounds(true);
-        this.playerPlatformCollider = this.physics.add.collider(this.player, this.platforms);
+        this.physics.add.collider(this.player, this.platforms);
+        this.physics.add.collider(this.player, this.moveP);
+
+        this.physics.add.overlap(this.fireballs,this.player,(p,f) => {
+            this.playerDeath();
+        })
 
         // クリボーのパチモン
         const enemy1Data = [
-            [37,8],
-            [49,4],
-            [50,4],
-            [7,3],
-            [9,3],
-            [53,9]
         ]
         this.enemies = this.physics.add.group();
         for(let n = 0; n < enemy1Data.length; n ++){
@@ -117,18 +170,11 @@ class Game extends Phaser.Scene {
 
         // 炎を出すてき
         const enemy2Data = [
-            [53,1],
-            [16,1],
-            [59,9],
-            [57,1]
-            // [300,0],
-            // [00,0],
-            // [1200,0]
         ]
         this.enemies2 = this.physics.add.group();
         for(let n = 0; n < enemy2Data.length; n ++){
             const eD = enemy2Data[n]
-            this.enemies2.create(bS * eD[0] + (bS/3),stage.height - (bS/2 + bS * (eD[1] + 3)),"enemy2");
+            this.enemies2.create(bS * eD[0] + (bS/3),stage.height - (bS/2 + bS * (eD[1] + 2)),"enemy2");
         }
         // 敵の衝突処理
         this.physics.add.collider(this.enemies2, this.platforms);
@@ -201,6 +247,7 @@ class Game extends Phaser.Scene {
     }
 
     update(){
+        this.fb.angle += 1;
         if(this.isPlayerDead == true){
             return
         }
@@ -362,7 +409,7 @@ var config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 6000 }, //重力の強さ
-            debug: false
+            debug: true
         }
     },
     scale: {
