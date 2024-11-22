@@ -33,6 +33,15 @@ class Game extends Phaser.Scene {
         this.bombSound = this.sound.add('bomb'); // 爆弾の音
         this.fallSound = this.sound.add('fall');
 
+        this.timerStart = this.time.now;  // ゲーム開始時の時間を記録
+        this.timerText = this.add.text(200, 16, 'Time: 0', {
+            fontSize: '32px',
+            fill: '#000'
+        });
+
+        this.timerText.setDepth(1)
+        this.timerText.setScrollFactor(0)
+
         const stage = {
             x: 0,
             y: 0,
@@ -202,7 +211,7 @@ class Game extends Phaser.Scene {
 
     collectStar(player, star) {
         star.disableBody(true, true);
-        this.score += 10;
+        this.score += 1;
         this.scoreText.setText('Score: ' + this.score);
         this.collectSound.play(); // 効果音を再生
     }
@@ -214,18 +223,24 @@ class Game extends Phaser.Scene {
             return;
         }
 
+        const elapsedTime = Math.floor((this.time.now - this.timerStart) / 1000);  // 秒単位で経過時間を計算
+
+        // タイマー表示を更新
+        this.timerText.setText('Time: ' + elapsedTime);
+        const cameraBounds = this.cameras.main.worldView;
+
         // キー入力処理
         if (cursors.up.isDown && this.player.body.touching.down) {
             this.player.setVelocityY(-1300);
             this.player.anims.play("turn", true);
         } else if (cursors.left.isDown) {
-            this.player.setVelocityX(-330);
+            this.player.setVelocityX(-550);
             this.player.flipX = true;
             if (this.player.body.touching.down) {
                 this.player.anims.play("walk", true);
             }
         } else if (cursors.right.isDown) {
-            this.player.setVelocityX(330);
+            this.player.setVelocityX(550);
             this.player.flipX = false;
             if (this.player.body.touching.down) {
                 this.player.anims.play("walk", true);
@@ -320,7 +335,7 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 3000 },
+            gravity: { y: 4000 },
         }
     },
     scale: {
