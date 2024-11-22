@@ -24,29 +24,28 @@ main {
     left: 50%;
     top: 60%;
     transform: translateX(-50%) translateY(-50%);
-    width: 500;
-    height: 300;
     text-align: center;
     display: flex;
     flex-wrap: wrap;
-    gap: 32px;
+    gap: 64px;
 }
 
 .selectItem {
     text-decoration: none;
     color: #000;
     display: block;
-    border: solid 1px #000;
-    width: calc((500px - 64px) / 2 - 2px);
-    height: 40px;
-    background-color: rgb(0 0 0 /.3);
     transition: scale 150ms;
     display: flex;
-    justify-content: center;
-    align-items: center;
+}
+
+img {
+    width: 100vw;   /* 画面の横幅 */
+    height: 100vh;  /* 画面の縦幅 */
+    object-fit: cover; /* 画像のアスペクト比を保ちながらトリミングして画面に合わせる */
 }
 
 .selectItem p{
+    font-size: 32px;
     margin: -4px 0 0 0;
 }
 
@@ -55,5 +54,5 @@ main {
 }
 
 .selectItem:hover{
-    scale: 1.05;
+    scale: 1.1;
 }

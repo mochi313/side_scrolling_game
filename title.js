@@ -7,7 +7,7 @@ class Game extends Phaser.Scene {
     preload(){
         // 画像の読み込み
         // this.load.image('ground', 'images/test.jpeg');
-        this.load.image('back', 'images/back_image3.png');
+        this.load.image('back', 'images/title2.png');
         this.load.spritesheet('mans', 'images/カービィず.png',
             { frameWidth: 64, frameHeight: 64 }
         );
@@ -112,6 +112,7 @@ var config = {
     type: Phaser.AUTO,
     width: Math.min(window.innerWidth, 1920),
     height: Math.min(window.innerHeight, 1080),
+    backgroundColor: '#fff',
     physics: {
         default: 'arcade',
         arcade: {
