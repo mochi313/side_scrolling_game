@@ -33,7 +33,7 @@ class Game extends Phaser.Scene {
         this.fallSound = this.sound.add('fall');
 
         this.timerStart = this.time.now;  // ゲーム開始時の時間を記録
-        this.timerText = this.add.text(200, 16, 'Time: 0', {
+        this.timerText = this.add.text(250, 16, 'Time: 0', {
             fontSize: '32px',
             fill: '#fff'
         });
