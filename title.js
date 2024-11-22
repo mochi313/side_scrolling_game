@@ -142,12 +142,14 @@ window.addEventListener('resize', () => {
 const s = document.getElementById("stageSelect")
 const b = document.getElementById("blur")
 window.addEventListener("keydown", (event) => {
-    if(event.key == "Enter"){
-        b.classList.remove("dN")
-        s.classList.remove("dN")
-    }
+    console.log(event.key)
     if(event.key == "Escape"){
         b.classList.add("dN")
         s.classList.add("dN")
+        return
+    };
+    if(event.key != "ArrowRight"&&event.key != "ArrowUp"&&event.key != "ArrowLeft"&&event.key != "ArrowDown"){
+        b.classList.remove("dN")
+        s.classList.remove("dN")
     }
 })

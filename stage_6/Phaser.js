@@ -27,9 +27,14 @@ class Game extends Phaser.Scene {
     }
 
     create(){
-        this.fireballs = this.physics.add.group();
-        this.fb = this.fireballs.create(400, 300, 'fb')
-        this.fb.setOrigin(0.1, 0.5);
+        this.fb = this.physics.add.group();
+        this.f = this.fb.create(400,300,"fb")
+        this.tweens.add({
+            targets: this.f,
+            rotation: -Math.PI * 2,
+            duration: 3000,
+            repeat: -1
+        });
 
         this.timerStart = this.time.now;  // ゲーム開始時の時間を記録
         this.timerText = this.add.text(10, 10, 'Time: 0', {
@@ -140,9 +145,9 @@ class Game extends Phaser.Scene {
         this.physics.add.collider(this.player, this.platforms);
         this.physics.add.collider(this.player, this.moveP);
 
-        this.physics.add.overlap(this.fireballs,this.player,(p,f) => {
-            this.playerDeath();
-        })
+        // this.physics.add.overlap(this.fireballs,this.player,(p,f) => {
+        //     this.playerDeath();
+        // })
 
         // クリボーのパチモン
         const enemy1Data = [
@@ -247,7 +252,6 @@ class Game extends Phaser.Scene {
     }
 
     update(){
-        this.fb.angle += 1;
         if(this.isPlayerDead == true){
             return
         }
