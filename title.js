@@ -153,3 +153,31 @@ window.addEventListener("keydown", (event) => {
         s.classList.remove("dN")
     }
 })
+
+// document.addEventListener('DOMContentLoaded', function() {
+//     // selected要素を取得
+//     const selectedElement = document.querySelector('.selected');
+//     // stageSelect内のすべてのa要素を取得
+//     const stageLinks = document.querySelectorAll('#stageSelect a');
+
+//     // a要素にhoverしたときの処理
+//     stageLinks.forEach(function(link) {
+//         link.addEventListener('mouseenter', function() {
+//             // a要素の位置を取得
+//             const rect = link.getBoundingClientRect();
+
+//             // selected要素の位置を更新
+//             selectedElement.style.top = rect.top + window.scrollY + 'px';
+//             selectedElement.style.left = rect.left + window.scrollX + 'px';
+//         });
+//     });
+
+//     // a要素から離れたときの処理
+//     stageLinks.forEach(function(link) {
+//         link.addEventListener('mouseleave', function() {
+//             // selected要素を元の位置に戻す (必要であれば)
+//             selectedElement.style.top = '22%';
+//             selectedElement.style.left = '0%';
+//         });
+//     });
+// });

@@ -44,38 +44,10 @@ main {
 }
 
 .stageSelect{
-    z-index: 3;
     position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    width: 1000px;
-    height: 600px;
-    text-align: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 32px;
-}
-
-.selectItem {
-    text-decoration: none;
-    color: #000;
-    display: block;
-    border: solid 1px #000;
-    width: calc((1000px - 64px) / 3 - 2px);
-    height: calc(600px / 2 - 18px);
-    background-color: rgb(0 0 0 /.3);
-    transition: scale 150ms;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.selectItem p{
-    margin: auto 0;
-}
-
-.selectItem:hover{
-    scale: 1.05;
+    top: 0;
+    left: 0;
+    z-index: 10;
 }
 
 .blur {
@@ -89,3 +61,57 @@ main {
 .dN{
     display: none;
 }
+
+.menu {
+    width: 100vw;   /* 画面の横幅 */
+    height: 100vh;  /* 画面の縦幅 */
+    object-fit: cover; /* 画像のアスペクト比を保ちながらトリミングして画面に合わせる */
+}
+
+.stageSelect a{
+    transition: scale 150ms, color 150ms;
+    position: absolute;
+    top: calc(35% - 289px / 2);
+    left: 50%;
+    z-index: 11;
+    padding: 128px 24px;
+    text-decoration: none;
+    color: #000;
+}
+.stageSelect a:hover{
+    scale: 1.4;
+    color: #fff !important;
+}
+
+.stageSelect a p{
+    font-size: 28px;
+    margin: 0px;
+}
+
+.stageSelect a:nth-child(2){
+    top: calc(50% - 289px / 2);
+    left: 5% !important;
+}
+.stageSelect a:nth-child(3){
+    top: calc(45% - 289px / 2);
+    left: 20% !important;
+}
+.stageSelect a:nth-child(4){
+    top: calc(40% - 289px / 2);
+    left: 35% !important;
+}
+.stageSelect a:nth-child(6){
+    top: calc(30% - 289px / 2);
+    left: 65% !important;
+}
+.stageSelect a:nth-child(7){
+    top: calc(25% - 289px / 2);
+    left: 80% !important;
+}
+
+/* .selected {
+    position: absolute;
+    top: 22%;
+    left: -200;
+    transition: top 0.3s, left 0.3s;
+} */
