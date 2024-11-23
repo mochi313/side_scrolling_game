@@ -265,6 +265,8 @@ class Game extends Phaser.Scene {
         this.score = 0;
 
         this.player.setVisible(false);
+        const m = document.getElementById("menu")
+        m.classList.toggle("dN")
 
         // fallSoundをここで一度だけ再生
         if (!this.fallSound.isPlaying) {
@@ -281,9 +283,12 @@ class Game extends Phaser.Scene {
         gameOver = true;
         player.anims.play('turn');
         this.showGameOverText("Goal!");
+        const m = document.getElementById("menu")
+        m.classList.remove("dN")
 
         this.time.delayedCall(2000, () => {
             // シーン再起動前に物理演算を再開し、gameOverをfalseにする
+            m.classList.add("dN")
             this.physics.resume();
             gameOver = false;
             this.scene.restart();
@@ -300,8 +305,11 @@ class Game extends Phaser.Scene {
         this.score = 0;
 
         this.bombSound.play(); // 爆発音を再生
+        const m = document.getElementById("menu")
+        m.classList.remove("dN")
 
         this.time.delayedCall(2000, () => {
+            m.classList.add("dN")
             this.physics.resume();
             gameOver = false;
             this.scene.restart();
@@ -354,3 +362,10 @@ var game = new Phaser.Game(config);
 window.addEventListener('resize', () => {
     game.scale.resize(window.innerWidth, window.innerHeight);
 });
+
+window.addEventListener("keydown",(event) => {
+    if(event.key == "Escape"){
+        const m = document.getElementById("menu")
+        m.classList.toggle("dN")
+    }
+})

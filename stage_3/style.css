@@ -1,0 +1,58 @@
+@font-face {
+    font-family: '002_zou_ver.2';
+/*   上記で効かない場合は下記をお試しください。 */
+/*   font-family: 'LEMON MILK'; */
+    src:
+        url('../font/002zouver.2-Regular.ttf') format('opentype'),
+}
+main {
+    font-family: "002_zou_ver.2";
+}
+
+.gameText{
+    font-size: 64px;
+    z-index: 1;
+    position: fixed;
+    left: 50%;
+    top: 40%;
+    transform: translateX(-50%) translateY(-55%);
+}
+
+.menu{
+    z-index: 3;
+    position: fixed;
+    left: 50%;
+    top: 60%;
+    transform: translateX(-50%) translateY(-50%);
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 64px;
+}
+
+.selectItem {
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    transition: scale 150ms;
+    display: flex;
+}
+
+img {
+    width: 100vw;   /* 画面の横幅 */
+    height: 100vh;  /* 画面の縦幅 */
+    object-fit: cover; /* 画像のアスペクト比を保ちながらトリミングして画面に合わせる */
+}
+
+.selectItem p{
+    font-size: 32px;
+    margin: -4px 0 0 0;
+}
+
+.dN{
+    display: none;
+}
+
+.selectItem:hover{
+    scale: 1.1;
+}
