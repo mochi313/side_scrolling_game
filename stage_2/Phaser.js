@@ -1,339 +1,356 @@
-let cursors;
-let gameOver = false;
 class Game extends Phaser.Scene {
     player;
     platforms;
-    score = 0;
-    scoreText;
-    stars;
-    bombs;
-    goalCollider;
-    gameOverText;
+    cursors;
+    enemies;
+    flare;
+    playerPlatformCollider;
+    timerText;
+    text;
 
     preload() {
-        this.load.image('ground', 'images/test.jpeg');
-        this.load.image('back', 'images/back.png');
-        this.load.spritesheet('man', 'images/spritesheet.png', { frameWidth: 131, frameHeight: 128 });
-        this.load.image("block", "images/block.png");
-        this.load.image("pblock", "images/maptile_renga_brown_02_matt.png");
-        this.load.image("goal", "images/goal_image2.png");
-        this.load.image('star', 'images/star.png');
-        this.load.image('bomb', 'images/bakudan_chakka.png'); // 爆弾画像を読み込む
-        // this.load.audio('bgm', 'audio/bgm.wav'); // BGMファイルを読み込む
-        this.load.audio('collect', 'audio/collect.mp3'); // スターを集めたときの効果音
-        this.load.audio('bomb', 'audio/bomb.mp3'); // 爆弾に当たったときの効果音
-        this.load.audio('fall', 'audio/fall.mp3');
+        // 画像の読み込み
+        // this.load.image('ground', 'images/test.jpeg');
+        this.load.image('back', 'images/back_image3.png');
+        this.load.spritesheet('mans', 'images/カービィず.png',
+            { frameWidth: 64, frameHeight: 64 }
+        );
+        this.load.image("enemy1", "images/enemy64.png")
+        this.load.image("enemy2", "images/enemy2.png")
+        this.load.image("flame", "images/flame2.png")
+        this.load.image("block", "images/block2.png")
+        this.load.image("platform", "images/platform.png")
+        this.load.image("goal", "images/goal_image2.png")
     }
 
     create() {
-        gameOver = false; // 明示的に初期化
-        // this.bgm = this.sound.add('bgm'); // BGMを読み込んだ音声を変数に保存
-        // this.bgm.play({ loop: true }); // ループ再生
-        this.collectSound = this.sound.add('collect'); // スターを集めたときの音
-        this.bombSound = this.sound.add('bomb'); // 爆弾の音
-        this.fallSound = this.sound.add('fall');
-
         this.timerStart = this.time.now;  // ゲーム開始時の時間を記録
-        this.timerText = this.add.text(250, 16, 'Time: 0', {
-            fontSize: '32px',
-            fill: '#000'
+        this.timerText = this.add.text(10, 10, 'Time: 0', {
+            font: '24px Arial',
+            fill: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 4
         });
-
         this.timerText.setDepth(1)
         this.timerText.setScrollFactor(0)
 
+        this.physics.world.gravity.y = 0;
         const stage = {
             x: 0,
             y: 0,
-            width: 1000 * 6,
+            width: 800 * 6, //ステージの大きさ
             height: this.scale.height
-        };
+        }
 
-        this.stage = {
-            x: 0,
-            y: 0,
-            width: 1000 * 6,
-            height: this.scale.height
-        };
-
+        // 背景の追加
         const background = this.add.image(this.scale.width / 2, this.scale.height / 2, 'back').setScrollFactor(0);
+        // 画像のリサイズ
         background.setDisplaySize(this.scale.width, this.scale.height);
 
+        // 地形の追加
+        const bS = 64 //blockSize
+        const floatingBlock = [
+            [33, 34, 35, 36, 37, 40, 41, 42, 43, 44, 64, 65, 66, 67, 68],
+            [34, 35, 36, 37, 40, 41, 42, 43, 65, 66, 67, 68],
+            [6, 7, 8, 35, 36, 37, 40, 41, 42, 48, 49, 50, 51, 66, 67, 68],
+            [36, 37, 40, 41, 67, 68],
+            [37, 40, 68],
+            [7, 51, 52, 53, 54, 57, 58, 59],
+            [],
+            []
+        ]
+        const ground = {
+            height: 3,
+            hole: [
+                10, 11, 12, 21, 22, 24, 25, 27, 28, 38, 39, 53, 54, 61, 62
+            ]
+        }
         this.platforms = this.physics.add.staticGroup();
-        const totalBlocks = Math.floor(stage.width / 64) + 1;
-
-        // すべてのブロックを生成
-        const blocks = [];
-        for (let i = 0; i < totalBlocks; i++) {
-            const block = this.platforms.create(64 * i + 32, stage.height - 32, "block");
-            blocks.push(block); // ブロックを配列に格納
-        }
-
-        // 複数の穴をランダムな位置に生成
-        const holeCount = 10; // 生成する穴の数
-        for (let j = 0; j < holeCount; j++) {
-            // ランダムな位置に穴を開ける。ただし最後のブロックを超えない範囲で指定
-            const holeStartIndex = Phaser.Math.Between(0, totalBlocks - 3); // 配列の範囲を考慮
-            const holeSize = Phaser.Math.Between(2, 3); // 穴のサイズを2〜3ブロックに設定
-
-            for (let i = 0; i < holeSize; i++) {
-                const block = blocks[holeStartIndex + i];
-                if (block && block.active) {  // ブロックが存在し、まだ有効な場合のみ無効化
-                    block.disableBody(true, true);
+        for (let i = 0; i < Math.floor(stage.width / bS + 1); i++) {
+            if (!ground.hole.includes(i)) {
+                for (let n = 0; n < ground.height; n++) {
+                    this.platforms.create(bS * i + (bS / 3), stage.height - (bS / 2 + bS * n), "block")
                 }
             }
         }
-
-        // pblockのランダム配置処理（高さもランダム）
-        const placeRandomPblocks = (platforms, totalWidth, blockSize, stageHeight) => {
-            const pblockCount = 5; // ランダム配置するpblockの数
-            const placedPositions = []; // 既に使用された位置を記録する配列
-
-            for (let i = 0; i < pblockCount; i++) {
-                let startX, startY;
-                let isOverlap;
-                do {
-                    isOverlap = false;
-                    startX = Phaser.Math.Between(0, totalWidth - blockSize * 4); // pblockは最大4ブロック分の幅をとる
-                    startY = Phaser.Math.Between(stageHeight - 300, stageHeight - blockSize); // 高さをランダムに設定
-                    const endX = startX + blockSize * Phaser.Math.Between(2, 4); // pblockのサイズを2～4ブロック分で決定
-
-                    // 既存のブロックと重ならないか確認
-                    for (let pos of placedPositions) {
-                        if (
-                            (startX >= pos.start && startX <= pos.end && Math.abs(startY - pos.y) < blockSize) || // 水平位置が被る
-                            (endX >= pos.start && endX <= pos.end && Math.abs(startY - pos.y) < blockSize) || // 水平位置が被る
-                            (startX <= pos.start && endX >= pos.end && Math.abs(startY - pos.y) < blockSize) // 範囲を覆う場合
-                        ) {
-                            isOverlap = true;
-                            break;
-                        }
-                    }
-                } while (isOverlap);
-
-                // 配置位置を保存
-                const pblockLength = Phaser.Math.Between(2, 4); // 2〜4個のpblockを配置
-                const newPosition = {
-                    start: startX,
-                    end: startX + blockSize * pblockLength,
-                    y: startY
-                };
-                placedPositions.push(newPosition);
-
-                // pblockを生成して配置
-                for (let j = 0; j < pblockLength; j++) {
-                    const pblock = platforms.create(startX + blockSize * j, startY, "pblock");
-                    pblock.refreshBody();
-                    pblock.setSize(blockSize, 35);
-                    pblock.setOffset(0, 0);
-                }
+        for (let i = 0; i < floatingBlock.length; i++) {
+            for (let n = 0; n < floatingBlock[i].length; n++) {
+                this.platforms.create(bS * floatingBlock[i][n] + (bS / 3), stage.height - (bS / 2 + bS * (i + 3)), "block")
             }
-        };
+        }
 
-        // ランダムな位置と高さにpblockを配置
-        placeRandomPblocks(this.platforms, stage.width, 64, stage.height);
-
-        this.player = this.physics.add.sprite(100, stage.height + 100, 'man');
+        // playerの作成
+        this.player = this.physics.add.sprite(100, 450, 'mans');
+        this.player.setGravityY(6000)
         this.player.setCollideWorldBounds(true);
-        this.player.setSize(90, 120);
-        this.player.setOffset(20, 4);
+        this.playerPlatformCollider = this.physics.add.collider(this.player, this.platforms);
 
-        this.physics.add.collider(this.player, this.platforms);
+        // クリボーのパチモン
+        const enemy1Data = [
+            [37, 8],
+            [49, 4],
+            [50, 4],
+            [7, 3],
+            [9, 3],
+            [53, 9]
+        ]
+        this.enemies = this.physics.add.group();
+        for (let n = 0; n < enemy1Data.length; n++) {
+            const eD = enemy1Data[n]
+            this.enemies.create(bS * eD[0] + (bS / 3), stage.height - (bS / 2 + bS * (eD[1] + 3)), "enemy1");
+        }
+        // 敵の衝突処理
+        this.physics.add.collider(this.enemies, this.platforms);
 
+        this.enemies.children.iterate((enemy) => {
+            enemy.setGravityY(6000)
+        });
+        this.physics.add.overlap(this.enemies, this.player, (p, e) => {
+            if (e.y - p.y > 54) {
+                e.destroy();  // enemyを破壊
+                this.player.setVelocityY(-1500)
+            }
+            else {
+                this.playerDeath();
+            }
+        }, null, this);
 
-        this.goalImage = this.add.image(stage.width - 128, stage.height - 320, 'goal');
-        this.goalCollider = this.physics.add.existing(this.goalImage);
-        this.goalCollider.body.setSize(2, 512);
-        this.goalCollider.body.setAllowGravity(false);
+        // 炎を出すてき
+        const enemy2Data = [
+            [53, 1],
+            [16, 1],
+            [59, 9],
+            [57, 1]
+            // [300,0],
+            // [00,0],
+            // [1200,0]
+        ]
+        this.enemies2 = this.physics.add.group();
+        for (let n = 0; n < enemy2Data.length; n++) {
+            const eD = enemy2Data[n]
+            this.enemies2.create(bS * eD[0] + (bS / 3), stage.height - (bS / 2 + bS * (eD[1] + 3)), "enemy2");
+        }
+        // 敵の衝突処理
+        this.physics.add.collider(this.enemies2, this.platforms);
+        this.physics.add.overlap(this.enemies2, this.player, (p, e) => {
+            if (e.y - p.y > 54) {
+                e.destroy();  // enemyを破壊
+                this.player.setVelocityY(-1500)
+            }
+            else {
+                this.playerDeath();
+            }
+        }, null, this);
 
+        // 炎
+        this.flare = this.physics.add.group(); //flareのグループを作成
+        this.flare.children.iterate((f) => {
+            f.setGravityY(0);  // Y軸の重力を無効化
+        })
+        this.physics.add.overlap(this.flare, this.player, (p, f) => {
+            this.playerDeath();
+        }, null, this);
 
-        cursors = this.input.keyboard.createCursorKeys();
+        // ゴールの画像を追加
+        this.goalImage = this.add.image(stage.width - 128, stage.height - (bS * ground.height) - 256, 'goal');
+        // ゴールの判定を追加
+        this.goalCollider = this.physics.add.staticGroup();
+        const goalBody = this.goalCollider.create(stage.width - 128, stage.height - (bS * ground.height) - 256, 'goal').setAlpha(0);
+        goalBody.setSize(2, 512);
 
-        this.anims.create({
-            key: 'walk',
-            frames: this.anims.generateFrameNumbers('man', { start: 0, end: 2 }),
+        //cursorsにユーザーのキーボードの操作を検知させる
+        this.cursors = this.input.keyboard.createCursorKeys();
+
+        this.anims.create({ //playerが歩いている時のアニメーショaン
+            key: 'walkLeft',
+            frames: this.anims.generateFrameNumbers('mans', { start: 3, end: 4 }),
             frameRate: 10,
             repeat: -1
         });
-        this.anims.create({
+        this.anims.create({ //playerが歩いている時のアニメーショaン
+            key: 'jumpLeft',
+            frames: this.anims.generateFrameNumbers('mans', { start: 3, end: 3 }),
+            frameRate: 10,
+            repeat: 1
+        });
+        this.anims.create({ //playerが歩いている時のアニメーショaン
+            key: 'walkRight',
+            frames: this.anims.generateFrameNumbers('mans', { start: 1, end: 2 }),
+            frameRate: 10,
+            repeat: -1
+        });
+        this.anims.create({ //playerが歩いている時のアニメーショaン
+            key: 'jumpRight',
+            frames: this.anims.generateFrameNumbers('mans', { start: 1, end: 1 }),
+            frameRate: 10,
+            repeat: 1
+        });
+        this.anims.create({ //playerが止まっている時のアニメーション
             key: "turn",
-            frames: [{ key: "man", frame: 0 }],
+            frames: [{ key: "mans", frame: 0 }],
             frameRate: 20
         });
 
+        //playerを追尾するカメラを作成
         this.cameras.main.startFollow(this.player);
         this.cameras.main.setBounds(stage.x, stage.y, stage.width, stage.height);
         this.physics.world.setBounds(stage.x, stage.y, stage.width, stage.height);
 
-
-
-        this.stars = this.physics.add.group({
-            key: 'star',
-            repeat: 70,
-            setXY: { x: 12, y: 0, stepX: 70 }
-        });
-
-        this.stars.children.iterate((child) => {
-            child.x = Phaser.Math.Between(0, stage.width);
-            child.y = Phaser.Math.Between(0, stage.height - 100);
-            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-            child.setCollideWorldBounds(true);
-        });
-
-        this.physics.add.collider(this.stars, this.platforms);
-
-
-        this.scoreText = this.add.text(16, 16, 'Score: 0', {
-            fontSize: '32px',
-            fill: '#000'
-        }).setScrollFactor(0);
-
-        this.physics.add.overlap(this.player, this.stars, this.collectStar, null, this);
-
-
-        this.bombs = this.physics.add.group();
-        this.physics.add.collider(this.bombs, this.platforms);
-        this.physics.add.collider(this.player, this.bombs, this.hitBomb, null, this);
-
-
+        // ゴールの判定
         this.physics.add.overlap(this.player, this.goalCollider, this.reachGoal, null, this);
-
-
-        // 1秒ごとに爆弾を生成するタイマー
-        this.bombSpawner = this.time.addEvent({
-            delay: 1000, // 1秒
-            callback: this.spawnBomb,
-            callbackScope: this,
-            loop: true
-        });
     }
-
-
-    collectStar(player, star) {
-        star.disableBody(true, true);
-        this.score += 1;
-        this.scoreText.setText('Score: ' + this.score);
-        this.collectSound.play(); // 効果音を再生
-    }
-
-
 
     update() {
-        if (gameOver) { // ゲームオーバーならupdate処理をスキップ
-            return;
+        if (this.isPlayerDead == true) {
+            return
         }
-
         const elapsedTime = Math.floor((this.time.now - this.timerStart) / 1000);  // 秒単位で経過時間を計算
 
         // タイマー表示を更新
         this.timerText.setText('Time: ' + elapsedTime);
         const cameraBounds = this.cameras.main.worldView;
 
-        // キー入力処理
-        if (cursors.up.isDown && this.player.body.touching.down) {
-            this.player.setVelocityY(-1300);
-            this.player.anims.play("turn", true);
-        } else if (cursors.left.isDown) {
-            this.player.setVelocityX(-550);
-            this.player.flipX = true;
-            if (this.player.body.touching.down) {
-                this.player.anims.play("walk", true);
+        if (this.cursors.up.isDown && this.player.body.touching.down) {
+            // 上が押されたら && 地面についていたら
+            this.player.setVelocityY(-1700);
+            this.player.anims.play("turn", true)
+        } else if (this.cursors.left.isDown) {
+            // 左が押されたら
+            this.player.setVelocityX(-400);
+            if (!this.player.body.touching.down) {
+                this.player.anims.play("jumpLeft", true)
             }
-        } else if (cursors.right.isDown) {
-            this.player.setVelocityX(550);
-            this.player.flipX = false;
             if (this.player.body.touching.down) {
-                this.player.anims.play("walk", true);
+                // 地面についていたら
+                this.player.anims.play("walkLeft", true)
+            }
+        } else if (this.cursors.right.isDown) {
+            // 右が押されたら
+            this.player.setVelocityX(400);
+            if (!this.player.body.touching.down) {
+                this.player.anims.play("jumpRight", true)
+            }
+            if (this.player.body.touching.down) {
+                // 地面についていたら
+                this.player.anims.play("walkRight", true)
             }
         } else {
+            // 何も押されていない時
             this.player.setVelocityX(0);
-            this.player.anims.play("turn", true);
+            this.player.anims.play("turn", true)
         }
-
-        // プレイヤーが画面外に落ちた場合（画面の下端を超えた場合）ゲームオーバー処理
-        if (this.player.y == this.game.config.height - 60) {
-            this.fallOutOfBounds(); // プレイヤーが画面外に落ちた時の処理
+        if (this.player.y > this.scale.height - 33) { // プレイヤーが画面の下端を超えた場合
+            this.playerDeath();
+            // this.scene.pause();  // ゲームを一時停止する
+            console.log("プレイヤーが画面外に落ちました。ゲームが停止しました。");
         }
-    }
+        // Enemy movement
+        this.enemies.children.iterate((enemy) => {
+            // Check if the enemy is within the camera bounds
+            if (enemy.x > cameraBounds.left - 100 && enemy.x < cameraBounds.right + 100) {
+                const playerX = this.player.x;
+                const enemyX = enemy.x;
 
-    fallOutOfBounds() {
-        if (gameOver) return; // ゲームオーバー状態なら処理しない
-        gameOver = true; // ゲームオーバー状態に設定
-        this.player.setTint(0xff0000); // プレイヤーを赤くする
-        this.physics.pause(); // 物理演算を一時停止
-        this.player.anims.play('turn'); // 待機アニメーションを再生
-        this.showGameOverText("Game Over"); // ゲームオーバーテキストを表示
-        this.score = 0;
+                let focus = 0;
 
-        this.player.setVisible(false);
+                // Normalize the vector and apply speed to the enemy
+                if (playerX - enemyX > 0) {
+                    focus = 1;
+                } else {
+                    focus = -1;
+                }
+                if (focus === 1) {
+                    enemy.setFlipX(true)
+                } else {
+                    enemy.setFlipX(false)
+                }
 
-        const m = document.getElementById("menu")
-        m.classList.toggle("dN")
+                const speed = 100; // Enemy speed (adjustable)
+                const velocityX = focus * speed;
 
-        // fallSoundをここで一度だけ再生
-        if (!this.fallSound.isPlaying) {
-            this.fallSound.play(); // 効果音を再生
-        }
-        this.time.delayedCall(2000, () => {
-            gameOver = false; // 再起動前にリセット
-            this.scene.restart();
+                // Apply the new velocity to the enemy
+                enemy.setVelocityX(velocityX);
+            } else {
+                // If the enemy is not within the camera's bounds, stop its movement
+                enemy.setVelocityX(0);
+            }
+        });
+
+        this.enemies2.children.iterate((enemy) => {
+            if (enemy.active === false) {
+                return;
+            }
+            const X = enemy.x;
+            const playerX = this.player.x;
+            enemy.setGravityY(6000);
+            let focus = 0
+            if (playerX - X > 0) {
+                focus = 1;
+            } else {
+                focus = -1;
+            }
+            if (focus === 1) {
+                enemy.setFlipX(true)
+            } else {
+                enemy.setFlipX(false)
+            }
+            // enemyに対してフレア生成のイベントを設定する
+            if (!enemy.flareEvent) {  // まだイベントが設定されていなければ
+                enemy.flareEvent = this.time.addEvent({
+                    delay: 3000, // 3秒ごとに発火
+                    callback: () => {
+                        if (!enemy.active) {
+                            enemy.flareEvent.remove(); // イベントを削除
+                            return;
+                        }
+                        const Y = enemy.y;
+                        const X = enemy.x;
+                        const playerX = this.player.x;
+                        let focus = 0
+                        if (playerX - X > 0) {
+                            focus = 1;
+                        } else {
+                            focus = -1;
+                        }
+                        if (enemy.x > cameraBounds.left - 100 && enemy.x < cameraBounds.right + 100) {
+                            const new_flare = this.flare.create(X, Y, "flame");
+                            new_flare.setVelocityX(focus * 300); // 150の速度で動かす
+                            new_flare.setGravityY(0);
+                            if (focus === 1) {
+                                new_flare.setFlipX(true); // 右方向に進むので、画像を反転
+                            } else {
+                                new_flare.setFlipX(false); // 左方向に進むので、画像をそのまま
+                            }
+                        }
+                    },
+                    callbackScope: this, // thisコンテキストを保持
+                    loop: true, // ループさせる
+                });
+            }
         });
     }
 
     reachGoal(player, goal) {
-        if (this.scene.isPaused() || gameOver) return;
-        gameOver = true;
-        player.anims.play('turn');
-        this.showGameOverText("Goal!");
+        const c = document.getElementById("clear")
+        c.classList.remove("dN")
         const m = document.getElementById("menu")
         m.classList.remove("dN")
-
-        this.time.delayedCall(2000, () => {
-            // シーン再起動前に物理演算を再開し、gameOverをfalseにする
-            this.physics.resume();
-            gameOver = false;
-            this.scene.restart();
-            m.classList.add("dN")
-        });
+        this.scene.pause(); // ゲームを一時停
     }
 
-    hitBomb(player, bomb) {
-        if (gameOver) return;
-        gameOver = true;
-        this.physics.pause(); // 物理演算を一時停止
-        player.setTint(0xff0000);
-        player.anims.play('turn');
-        this.showGameOverText("Game Over!");
-        this.score = 0;
-
-        this.bombSound.play(); // 爆発音を再生
+    playerDeath() {
+        this.isPlayerDead = true;
+        this.player.anims.play("turn", true)
+        this.player.setTint(0xff0000); // 赤色でダメージを表示
+        this.player.setVelocity(0, 0); // 速度を止める（衝突時の速度）
+        this.player.setVelocityY(-10000);
+        this.time.delayedCall(50, () => {
+            this.scene.pause(); // 0.5秒後にシーンをポーズ
+        }, [], this);
+        const d = document.getElementById("over")
+        d.classList.remove("dN")
         const m = document.getElementById("menu")
         m.classList.remove("dN")
-
-        this.time.delayedCall(2000, () => {
-            m.classList.add("dN")
-            this.physics.resume();
-            gameOver = false;
-            this.scene.restart();
-        });
-    }
-
-    showGameOverText(text) { // ゲームオーバーテキストを表示する関数
-        this.gameOverText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, text, {
-            fontSize: '64px',
-            fill: '#000',
-            stroke: '#fff',
-            strokeThickness: 6
-        }).setOrigin(0.5).setScrollFactor(0);
-    }
-
-    spawnBomb() {
-        if (!this.stage) return; // stageが未定義の場合のガード
-
-        const bomb = this.bombs.create(Phaser.Math.Between(0, this.physics.world.bounds.width), 0, 'bomb');
-        bomb.setBounce(1);
-        bomb.setCollideWorldBounds(true);
-        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
     }
 }
 
@@ -344,7 +361,8 @@ var config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 4000 },
+            gravity: { y: 6000 }, //重力の強さ
+            debug: false
         }
     },
     scale: {
@@ -354,20 +372,14 @@ var config = {
     render: {
         pixelArt: false,
         antialias: true,
-        antialiasGL: false,
+        antialiasGL: true,
     },
     scene: Game
 };
 
+//ゲームオブジェクトの生成
 var game = new Phaser.Game(config);
 
 window.addEventListener('resize', () => {
     game.scale.resize(window.innerWidth, window.innerHeight);
 });
-
-window.addEventListener("keydown",(event) => {
-    if(event.key == "Escape"){
-        const m = document.getElementById("menu")
-        m.classList.toggle("dN")
-    }
-})

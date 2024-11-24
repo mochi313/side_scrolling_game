@@ -1,22 +1,16 @@
 <!DOCTYPE html>
 <html lang="js">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>stage_2</title>
     <link rel="stylesheet" type="text/css" href="./style.css">
+    <title>stage_1</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
-    </style>
 </head>
-
 <body>
     <main>
+        <img src="../images/gameover.png" alt="" style="position: fixed;top: 0;left: 0;" class="dN" id="over">
+        <img src="../images/gameclear_black.png" alt="" style="position: fixed;top: 0;left: 0;" class="dN" id="clear">
         <div class="menu dN" id="menu">
             <a href="../index.html" class="selectItem">
                 <p>title</p>
@@ -25,8 +19,7 @@
                 <p>restart</p>
             </a>
         </div>
+        <script src="Phaser.js" type="module"></script>
     </main>
-    <script src="Phaser.js" type="module"></script>
 </body>
-
 </html>

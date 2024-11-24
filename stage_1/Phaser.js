@@ -62,7 +62,7 @@ class Game extends Phaser.Scene {
         const ground = {
             height: 3,
             hole: [
-                10, 11, 12, 21, 22, 24, 25, 27, 28, 38, 39, 53, 54, 61, 62
+                10, 11, 12, 21, 22, 23, 26, 27, 28, 38, 39, 53, 54, 61, 62
             ]
         }
         this.platforms = this.physics.add.staticGroup();
@@ -88,9 +88,9 @@ class Game extends Phaser.Scene {
         // クリボーのパチモン
         const enemy1Data = [
             [37, 8],
-            [49, 4],
+            // [49, 4],
             [50, 4],
-            [7, 3],
+            // [7, 3],
             [9, 3],
             [53, 9]
         ]
@@ -117,10 +117,10 @@ class Game extends Phaser.Scene {
 
         // 炎を出すてき
         const enemy2Data = [
-            [53, 1],
-            [16, 1],
-            [59, 9],
-            [57, 1]
+            // [53, 1],
+            // [16, 1],
+            // [59, 9],
+            // [57, 1]
             // [300,0],
             // [00,0],
             // [1200,0]
