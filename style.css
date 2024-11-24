@@ -59,7 +59,7 @@ main {
 }
 
 .dN{
-    display: none;
+    display: none !important;
 }
 
 .menu {

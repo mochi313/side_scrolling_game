@@ -145,12 +145,15 @@ const b = document.getElementById("blur")
 const d1 = document.getElementById("d1")
 const d2 = document.getElementById("d2")
 const d3 = document.getElementById("d3")
+const desc = document.getElementById("desc")
 
 window.addEventListener("keydown", (event) => {
     console.log(event.key)
     if(event.key == "Escape"){
         b.classList.add("dN")
         s.classList.add("dN")
+        desc.classList.remove("dN")
+        console.log(desc)
         return
     };
     if(event.key == "ArrowRight"){
@@ -165,6 +168,7 @@ window.addEventListener("keydown", (event) => {
     if(event.key != "ArrowRight"&&event.key != "ArrowUp"&&event.key != "ArrowLeft"&&event.key != "ArrowDown"){
         b.classList.remove("dN")
         s.classList.remove("dN")
+        desc.classList.add("dN")
     }
 })
 
