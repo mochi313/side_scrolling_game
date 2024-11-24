@@ -141,6 +141,11 @@ window.addEventListener('resize', () => {
 
 const s = document.getElementById("stageSelect")
 const b = document.getElementById("blur")
+
+const d1 = document.getElementById("d1")
+const d2 = document.getElementById("d2")
+const d3 = document.getElementById("d3")
+
 window.addEventListener("keydown", (event) => {
     console.log(event.key)
     if(event.key == "Escape"){
@@ -148,11 +153,27 @@ window.addEventListener("keydown", (event) => {
         s.classList.add("dN")
         return
     };
+    if(event.key == "ArrowRight"){
+        d3.classList.add("action")
+    }
+    if(event.key == "ArrowUp"){
+        d1.classList.add("action")
+    }
+    if(event.key == "ArrowLeft"){
+        d2.classList.add("action")
+    }
     if(event.key != "ArrowRight"&&event.key != "ArrowUp"&&event.key != "ArrowLeft"&&event.key != "ArrowDown"){
         b.classList.remove("dN")
         s.classList.remove("dN")
     }
 })
+
+window.addEventListener("keyup",(event) => {
+    d3.classList.remove("action")
+    d1.classList.remove("action")
+    d2.classList.remove("action")
+})
+
 
 // document.addEventListener('DOMContentLoaded', function() {
 //     // selected要素を取得
